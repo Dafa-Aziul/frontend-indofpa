@@ -20,6 +20,8 @@ export type KuesionerMonitoringDetail = {
   kategori: {
     nama: string;
   };
+  startDate: string;
+  endDate: string;
   _count: {
     responden: number;
   };

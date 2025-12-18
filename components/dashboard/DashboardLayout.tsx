@@ -18,12 +18,11 @@ export default function DashboardLayout({
       <div className="flex flex-1 flex-col md:ml-64">
         <HeaderShell onOpenSidebar={() => setOpenSidebar(true)} />
 
-        <main className="flex-1 overflow-y-auto bg-gray-50 pt-16">
+        <main className="flex-1 overflow-y-auto bg-gray-50 pt-16 min-w-0">
           <div className="mx-auto w-full max-w-7xl px-6 py-6">
             {children}
           </div>
         </main>
-
       </div>
     </div>
   );

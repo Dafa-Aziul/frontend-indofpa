@@ -35,7 +35,7 @@ export default function KategoriTable({
             {/* Wrapper scroll horizontal (Setara dengan Bootstrap 'table-responsive') */}
             <div className="w-full overflow-x-auto">
                 {/* min-w-[400px] digunakan untuk memicu scroll di layar kecil */}
-                <Table className="min-w-[400px] divide-y">
+                <Table className="divide-y">
 
                     {/* HEADER */}
                     <TableHeader>
@@ -50,8 +50,8 @@ export default function KategoriTable({
                                 Nama Kategori
                             </TableHead>
 
-                            {/* Kolom Aksi: w-[80px] - Lebar minimum untuk dua ikon kecil */}
-                            <TableHead className="w-[80px] text-white text-center font-bold px-1 py-3">
+                            {/* Kolom Aksi: w-20 - Lebar minimum untuk dua ikon kecil */}
+                            <TableHead className="w-20 text-white text-center font-bold px-1 py-3">
                                 Aksi
                             </TableHead>
                         </TableRow>

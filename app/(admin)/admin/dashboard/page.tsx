@@ -1,4 +1,4 @@
-// fileName: src/pages/admin/dashboard/index.tsx (Asumsi Lokasi)
+// fileName: src/pages/admin/dashboard/index.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,13 +12,16 @@ import { TrendChartSkeleton } from "@/features/dashboard/components/skeletons/Tr
 import { SummaryCardsSkeleton } from "@/features/dashboard/components/skeletons/SummaryCardsSkeleton";
 import { DistributionChartSkeleton } from "@/features/dashboard/components/skeletons/DistributionChartSkeleton";
 import PageHeader from "@/components/common/page-header";
+import React from "react"; // Tambahkan import React jika belum ada di file typeskrip Anda
 
 export default function DashboardPage() {
     const { data, loading } = useDashboard();
 
-    // 1. Ambil nama user dari localStorage (client only)
     const [userName, setUserName] = useState<string | null>(null);
+    // State untuk mengontrol penundaan minimal
+    const [isDelayElapsed, setIsDelayElapsed] = useState(false); 
 
+    // 1. Ambil nama user dari localStorage (client only)
     useEffect(() => {
         const id = requestAnimationFrame(() => {
             const saved = localStorage.getItem("user");
@@ -33,13 +36,44 @@ export default function DashboardPage() {
         return () => cancelAnimationFrame(id);
     }, []);
 
+    // 2. Logika Penundaan Minimal untuk Smooth Transition
+    useEffect(() => {
+        let timer: NodeJS.Timeout | null = null;
+        
+        // Kasus 1: Sedang Loading (Mulai hitung delay minimal)
+        if (loading) {
+            setIsDelayElapsed(false);
+            timer = setTimeout(() => {
+                // Setelah 300ms, izinkan konten untuk muncul
+                setIsDelayElapsed(true);
+            }, 300); 
+        } 
+        
+        // Kasus 2: Loading Selesai (Data sudah ada atau ada error)
+        if (!loading) {
+             // Langsung set true agar konten segera ditampilkan
+             setIsDelayElapsed(true);
+        }
+
+        // Cleanup: Bersihkan timer
+        return () => {
+            if (timer) {
+                clearTimeout(timer);
+            }
+        };
+    }, [loading]); 
+    
+    // Tentukan apakah kita harus menampilkan Skeleton
+    const showLoading = loading || !isDelayElapsed;
+
 
     // ============================
     // LOADING UI
     // ============================
-    if (loading) {
+    if (showLoading) {
         return (
-            <div className="space-y-10">
+            // Tambahkan transisi opacity pada container skeleton
+            <div className="space-y-10 transition-opacity duration-300"> 
                 {/* Menggunakan PageHeader untuk konsistensi di loading state */}
                 <PageHeader className="pb-6"
                     title={userName ? `Selamat datang, ${userName}` : "Selamat Datang"}
@@ -92,7 +126,7 @@ export default function DashboardPage() {
     // ============================
     if (!data) {
         return (
-            <div className="p-6 text-center text-muted-foreground">
+            <div className="p-6 text-center text-muted-foreground opacity-0 animate-fadeIn">
                 Data tidak ditemukan
             </div>
         );
@@ -102,7 +136,9 @@ export default function DashboardPage() {
     // MAIN CONTENT
     // ============================
     return (
-        <>
+        // ✅ Tambahkan class untuk fade-in pada container utama
+        <div className="opacity-0 animate-fadeIn">
+            
             {/* Header Section */}
             <PageHeader className="pb-6"
                 title={userName ? `Selamat datang, ${userName}`: "Selamat Datang"}
@@ -135,7 +171,6 @@ export default function DashboardPage() {
                                 Statistik penting dari seluruh kuisioner Anda
                             </p>
                         </CardHeader>
-                        {/* ✅ PERBAIKAN: Menghapus mx-6, karena CardContent sudah mengatur padding */}
                         <CardContent className="pt-4"> 
                             <SummaryCards summary={data.summary} />
                         </CardContent>
@@ -154,6 +189,6 @@ export default function DashboardPage() {
                     </Card>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

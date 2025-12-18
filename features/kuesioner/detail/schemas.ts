@@ -3,9 +3,6 @@ import { z } from "zod";
 
 /* ======================================================
    VARIABEL
-   Endpoint:
-   - POST   /kuesioner/:kuesionerId/variabel
-   - PATCH  /variabel/:variabelId
 ====================================================== */
 
 export const variabelSchema = z.object({
@@ -18,9 +15,6 @@ export type VariabelFormValues = z.infer<typeof variabelSchema>;
 
 /* ======================================================
    INDIKATOR
-   Endpoint:
-   - POST   /variabel/:variabelId/indikator
-   - PATCH  /indikator/:indikatorId
 ====================================================== */
 
 export const indikatorSchema = z.object({
@@ -36,17 +30,14 @@ export type IndikatorFormValues = z.infer<typeof indikatorSchema>;
 
 /* ======================================================
    PERTANYAAN & SKALA (BARU: Mendukung Template & Custom Field Array)
-   Endpoint:
-   - POST   /indikator/:indikatorId/pertanyaan
-   - PATCH  /pertanyaan/:pertanyaanId
 ====================================================== */
 
 const ScaleItemSchema = z.object({
-  // Nilai numerik skala, digunakan untuk membuat key objek (1, 2, 3, dst.)
   value: z.number().int().min(1),
-  // Label teks yang dimasukkan pengguna
   label: z.string().min(1, "Label wajib diisi"),
 });
+
+const TemplateTypeEnum = z.enum(["likert_5", "likert_6_tt", "custom"]);
 
 export const PertanyaanFormSchema = z.object({
   teksPertanyaan: z.string().min(5, "Pertanyaan minimal 5 karakter"),
@@ -62,18 +53,26 @@ export const PertanyaanFormSchema = z.object({
     .min(1, "Urutan minimal 1"),
 
   // Field UI: Menentukan mode skala (likert_5, likert_6_tt, atau custom)
+  // Menggunakan z.union untuk tipe enum + transform string kosong menjadi undefined.
+  // Properti 'error'/errorMap yang bermasalah DIHAPUS, validasi required dilakukan di .superRefine.
   templateType: z
-    .string({
-      // ✅ required_error DITERIMA di properti konfigurasi z.string()
-      // Ini menangani kasus jika select tidak dipilih (inputnya adalah string kosong)
-      required_error: "Pilihan Skala wajib diisi",
-    })
-    .pipe(
-      // Pipe memastikan string yang diterima adalah salah satu dari nilai enum yang diizinkan.
-      // Ini berfungsi sebagai validasi nilai (type/value error).
-      z.enum(["likert_5", "likert_6_tt", "custom"])
-    ),
-  // Field data: Array untuk menampung semua poin skala (baik dari template maupun kustom)
+    .union([
+      z.literal("").transform(() => undefined), // Untuk menangani input select yang kosong
+      TemplateTypeEnum,
+    ])
+    .optional() // Dibuat optional karena select bisa kosong
+    .superRefine((val, ctx) => {
+      // Logika validasi required kustom:
+      if (!val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Pilihan Skala wajib diisi",
+        });
+        return z.NEVER; // Menghentikan validasi lebih lanjut
+      }
+    }),
+
+  // Field data: Array untuk menampung semua poin skala
   customScales: z
     .array(ScaleItemSchema)
     .min(2, "Skala minimal 2 poin")
@@ -81,7 +80,7 @@ export const PertanyaanFormSchema = z.object({
     .optional(),
 
   // ID indikator tempat pertanyaan ini berada (Diperlukan saat CREATE/PATCH)
-  indikatorId: z.number().int().min(1).optional(),
+  indikatorId: z.number().int().min(1, "Indikator wajib dipilih").optional(),
 });
 
 export type PertanyaanFormValues = z.infer<typeof PertanyaanFormSchema>;

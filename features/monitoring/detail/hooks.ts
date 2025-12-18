@@ -66,7 +66,7 @@ export function useMonitoringDetail(kuesionerId: number) {
         } finally {
             setIsLoading(false);
         }
-    }, [kuesionerId, page, search]);
+    }, [kuesionerId]);
 
     useEffect(() => {
         // Cek lagi di useEffect sebelum memicu fetch

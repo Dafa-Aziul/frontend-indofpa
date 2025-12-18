@@ -79,7 +79,7 @@ export default function MonitoringPage() {
                     <MonitoringTable
                         data={state.data}
                         page={state.page}
-                        limit={state.meta?.limit ?? 10} 
+                        limit={state.meta?.limit ?? 10}
                         onViewDetail={handleViewDetail}
                     />
 

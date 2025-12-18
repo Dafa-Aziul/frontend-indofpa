@@ -75,8 +75,6 @@ export function LoginForm() {
     return (
         <form
             onSubmit={handleSubmit(onSubmit)}
-            // ✅ PERBAIKAN: Menambahkan padding horizontal minimum 4 pada mobile,
-            // dan menggunakan p-6/p-8 pada ukuran sm ke atas.
             className="w-full max-w-sm px-4 py-6 sm:p-8 bg-white space-y-5 mx-auto"
         >
             {/* HEADER */}
@@ -196,10 +194,10 @@ export function LoginForm() {
                 disabled={isSubmitting}
                 className="
                     w-full
-                    bg-[var(--border)]
-                    text-[var(--primary-foreground)]
-                    hover:bg-[var(--ring)]
-                    active:bg-[var(--accent)]
+                    bg-border
+                    text-primary-foreground
+                    hover:bg-ring
+                    active:bg-accent
                     disabled:opacity-50 disabled:cursor-not-allowed
                 ">
                 {isSubmitting ? "Logging in..." : "Sign In"}

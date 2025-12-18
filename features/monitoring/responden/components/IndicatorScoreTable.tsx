@@ -28,8 +28,8 @@ const IndicatorScoreTable: React.FC<IndicatorScoreTableProps> = ({ scores }) => 
             <CardContent className="space-x-5">
                 <div className="relative w-full overflow-x-auto rounded-lg border">
                     <Table className="min-w-[700px]">
-                        <TableHeader className=''>
-                            <TableRow className="bg-green-600 hover:bg-green-700">
+                        <TableHeader >
+                            <TableRow className="bg-green-600 hover:bg-grey-100">
                                 <TableHead className="w-[50px] text-white font-bold">No</TableHead>
                                 <TableHead className="text-white font-bold">Indikator</TableHead>
                                 <TableHead className="text-right text-white font-bold">Skor Mentah</TableHead>
@@ -43,13 +43,12 @@ const IndicatorScoreTable: React.FC<IndicatorScoreTableProps> = ({ scores }) => 
                                 const isLowest = item.scoreRaw === lowestScore;
 
                                 return (
-                                    // ✅ PERBAIKAN: Hapus fragment kosong (<> dan </>)
                                     <TableRow key={item.indikatorId} className={`${isHighest ? 'bg-green-50 hover:bg-green-100' : isLowest ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'} transition-colors`}>
                                         <TableCell className="font-medium">{index + 1}</TableCell>
                                         <TableCell className="font-medium flex items-center gap-2">
                                             {item.namaIndikator}
-                                            {isHighest && <TrendingUp className="h-4 w-4 text-green-600" title="Skor Tertinggi" />}
-                                            {isLowest && <TrendingDown className="h-4 w-4 text-red-600" title="Skor Terendah" />}
+                                            {isHighest && <TrendingUp className="h-4 w-4 text-green-600" />}
+                                            {isLowest && <TrendingDown className="h-4 w-4 text-red-600" />}
                                         </TableCell>
                                         <TableCell className="text-right font-bold">{item.scoreRaw.toFixed(2)}</TableCell>
                                         <TableCell className="text-right">{item.maxScore}</TableCell>

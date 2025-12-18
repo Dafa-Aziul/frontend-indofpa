@@ -34,18 +34,40 @@ export default function KuesionerTable({
     const router = useRouter();
 
     return (
-        <div className="relative w-full overflow-x-auto rounded-lg border bg-white">
-            <Table className="min-w-full">
-                <TableHeader>
-                    <TableRow className="bg-accent pointer-events-none">
-                        <TableHead className="w-[60px] text-center text-white font-bold">
+        <div className="relative w-full overflow-x-auto rounded-lg border bg-white shadow-md">
+
+            {/* Menggunakan table-auto, dan memaksa lebar minimum di mobile agar scroll terjadi */}
+            <Table className="divide-y table-auto min-w-[550px]">
+                <TableHeader className="sticky top-0 bg-accent z-10">
+                    <TableRow className="pointer-events-none">
+
+                        {/* No: Tetap di desktop, diperkecil di mobile (<sm) */}
+                        <TableHead className="w-[60px] sm:w-20 px-2 py-3 text-center text-white font-bold text-sm">
                             No
                         </TableHead>
-                        <TableHead className="text-white font-bold">Judul</TableHead>
-                        <TableHead className="text-white font-bold">Kategori</TableHead>
-                        <TableHead className="text-white font-bold">Variabel</TableHead>
-                        <TableHead className="text-white font-bold">Status</TableHead>
-                        <TableHead className="text-white font-bold text-center">
+
+                        {/* Judul: Lebar fleksibel (table-auto), tapi terpotong di mobile (<sm) */}
+                        <TableHead className="w-1/3 py-3 text-white font-bold min-w-[150px] text-sm">
+                            Judul
+                        </TableHead>
+
+                        {/* Kategori: Hanya terlihat di desktop (>md) */}
+                        <TableHead className="hidden md:table-cell py-3 text-white font-bold min-w-[100px] text-sm">
+                            Kategori
+                        </TableHead>
+
+                        {/* Variabel: Hanya terlihat di desktop (>md) */}
+                        <TableHead className="hidden md:table-cell py-3 text-white font-bold min-w-20 text-sm">
+                            Variabel
+                        </TableHead>
+
+                        {/* Status: Lebar fleksibel */}
+                        <TableHead className="py-3 text-white font-bold min-w-20 text-sm">
+                            Status
+                        </TableHead>
+
+                        {/* Aksi: Lebar tetap di desktop, diperkecil di mobile */}
+                        <TableHead className="text-white font-bold text-center w-[150px] min-w-[100px] pr-2 text-sm">
                             Aksi
                         </TableHead>
                     </TableRow>
@@ -56,7 +78,7 @@ export default function KuesionerTable({
                         <TableRow>
                             <TableCell
                                 colSpan={6}
-                                className="h-10 text-center text-muted-foreground"
+                                className="h-24 text-center text-muted-foreground text-sm"
                             >
                                 Belum ada data kuesioner
                             </TableCell>
@@ -65,7 +87,7 @@ export default function KuesionerTable({
                         data.map((item, index) => {
                             const nomor = (page - 1) * limit + index + 1;
                             const isArsip = item.status === "Arsip";
-                            const isDraft = item.status === "Draft"
+                            const isDraft = item.status === "Draft";
                             return (
                                 <TableRow
                                     key={item.kuesionerId}
@@ -76,18 +98,31 @@ export default function KuesionerTable({
                                         )
                                     }
                                 >
-                                    <TableCell className="text-center">{nomor}</TableCell>
-                                    <TableCell className="font-medium">
+                                    {/* Data Sel: Padding py-2 di desktop (default shadcn), py-1.5 di mobile */}
+                                    <TableCell className="px-2 py-2 sm:py-1.5 text-center text-sm sm:text-xs">{nomor}</TableCell>
+
+                                    {/* Judul: Terpotong di mobile (<md) */}
+                                    <TableCell className="font-medium py-2 sm:py-1.5 text-sm sm:text-xs max-w-none sm:max-w-[150px] truncate">
                                         {item.judul}
                                     </TableCell>
-                                    <TableCell>{item.kategori.nama}</TableCell>
-                                    <TableCell>{item._count.variabel}</TableCell>
-                                    <TableCell>
+
+                                    {/* Kategori: Disembunyikan di mobile (<md) */}
+                                    <TableCell className="hidden md:table-cell py-2 text-sm">
+                                        {item.kategori.nama}
+                                    </TableCell>
+
+                                    {/* Variabel: Disembunyikan di mobile (<md) */}
+                                    <TableCell className="hidden md:table-cell py-2 text-sm">
+                                        {item._count.variabel}
+                                    </TableCell>
+
+                                    <TableCell className="py-2 sm:py-1.5">
                                         <KuesionerStatusBadge status={item.status} />
                                     </TableCell>
 
+                                    {/* Kolom Aksi */}
                                     <TableCell
-                                        className="text-center"
+                                        className="text-center p-2 sm:p-0.5" // p-2 di desktop, p-0.5 di mobile
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <div className="flex justify-center gap-2">

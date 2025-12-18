@@ -1,4 +1,3 @@
-// fileName: src/pages/admin/kategori/index.tsx (Asumsi Lokasi)
 "use client";
 
 import {
@@ -6,9 +5,11 @@ import {
     CardHeader,
     CardContent,
 } from "@/components/ui/card";
+
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import KategoriTable from "@/features/kategori/components/kategori-table";
 import KategoriFormModal from "@/features/kategori/components/kategori-form-modal";
@@ -28,15 +29,6 @@ export default function KategoriPage() {
         return <ErrorState onRetry={state.refetch} />;
     }
 
-    // ❗ Loading State
-    if (state.isLoading) {
-        return (
-            <div className="flex justify-center items-center h-[50vh]">
-                <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-            </div>
-        );
-    }
-
     return (
         <>
             <PageHeader
@@ -45,8 +37,9 @@ export default function KategoriPage() {
             <AppBreadcrumb
                 className="pb-3"
                 items={[
-                    { label: "Dashboard", href: "/admin" },
-                    { label: "Daftar Kategori" },
+                    { label: "Daftar Kategori", href: "/admin/kategori" },
+                    { label: "Daftar Kategori", href: "/admin/kategori" },
+                    { label: "asfasd" }
                 ]}
             />
             <Card>
@@ -59,13 +52,13 @@ export default function KategoriPage() {
                             value={state.search}
                             onChange={(e) => {
                                 state.setSearch(e.target.value);
-                                state.setPage(1); 
+                                state.setPage(1);
                             }}
                             className="w-full md:max-w-sm"
                         />
 
                         {/* ACTION */}
-                        <Button onClick={() => state.setOpenForm(true)} className="w-full md:w-auto">
+                        <Button onClick={() => state.setOpenForm(true)}>
                             <Plus className="mr-2 h-4 w-4" />
                             Tambah Kategori
                         </Button>
@@ -73,42 +66,37 @@ export default function KategoriPage() {
                 </CardHeader>
 
                 {/* ================= CONTENT ================= */}
-                <CardContent className="space-y-4 pt-6">
-                    {/* ✅ SOLUSI SCROLLING: Bungkus KategoriTable dengan overflow-x-auto */}
-                    <div className="w-full overflow-x-auto">
+                <CardContent className="space-y-4">
+                    <>
                         <KategoriTable
                             data={state.data}
                             page={state.page}
-                            limit={state.meta?.limit || 10}
+                            limit={10}
                             onEdit={(row) => {
                                 state.setEditData(row);
                                 state.setOpenForm(true);
                             }}
                             onDelete={(id) => state.setDeleteId(id)}
                         />
-                    </div>
-                    {/* Akhir wrapper scroll */}
 
-                    {state.meta && (
-                        <KategoriPagination
-                            page={state.page}
-                            pages={state.meta.pages}
-                            limit={state.meta.limit}
-                            total={state.meta.total}
-                            count={state.data.length}
-                            onPageChange={state.setPage}
-                        />
-                    )}
+                        {state.meta && (
+                            <KategoriPagination
+                                page={state.page}
+                                pages={state.meta.pages}
+                                limit={state.meta.limit}
+                                total={state.meta.total}
+                                count={state.data.length}
+                                onPageChange={state.setPage}
+                            />
+                        )}
+                    </>
                 </CardContent>
 
                 {/* ================= MODALS ================= */}
                 <KategoriFormModal
                     open={state.openForm}
                     defaultValues={
-                        state.editData ? {
-                            nama: state.editData.nama,
-                            kategoriId: state.editData.kategoriId
-                        } : undefined
+                        state.editData ? { nama: state.editData.nama } : undefined
                     }
                     onClose={() => {
                         state.setOpenForm(false);

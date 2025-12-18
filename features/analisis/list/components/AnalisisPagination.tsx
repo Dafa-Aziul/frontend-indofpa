@@ -18,7 +18,8 @@ type Props = {
     onPageChange: (page: number) => void;
 };
 
-export default function KategoriPagination({
+// Mengubah nama fungsi dari KategoriPagination menjadi AnalisisPagination
+export default function AnalisisPagination({
     page,
     pages,
     limit,
