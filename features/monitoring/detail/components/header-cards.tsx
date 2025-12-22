@@ -1,11 +1,11 @@
 // fileName: src/features/monitoring/detail/components/header-cards.tsx
 "use client";
 
-import React from "react"; // Import React untuk menggunakan React.cloneElement
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-// Ganti Calendar dengan CalendarDays jika diperlukan, tapi Calendar cukup representatif di sini
-import { Clock, Calendar, Target, CheckCheck, Percent } from "lucide-react";
+import { Calendar, Target, CheckCheck, Percent } from "lucide-react";
 import { KuesionerMonitoringDetail } from "../types";
+import { cn } from "@/lib/utils";
 
 interface HeaderCardsProps {
     kuesioner: KuesionerMonitoringDetail;
@@ -13,95 +13,91 @@ interface HeaderCardsProps {
     endDate?: string;
 }
 
-// Utility untuk format tanggal
 const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     try {
-        // Menggunakan format yang lebih lengkap dan rapi seperti di AnalisisHeaderCards
         return new Intl.DateTimeFormat('id-ID', {
             day: 'numeric',
-            month: 'long',
+            month: 'short', // Menggunakan 'short' agar lebih hemat ruang di mobile
             year: 'numeric'
         }).format(new Date(dateString));
     } catch {
-        return dateString.split('T')[0] || '-'; // Fallback
+        return dateString.split('T')[0] || '-';
     }
 };
 
-// Logika warna (Dibuat sederhana karena ini monitoring, bukan interpretasi)
 const greenSolid = "bg-green-600";
 const blueSolid = "bg-blue-600";
 const yellowSolid = "bg-yellow-600";
 
-// ✅ STRUKTUR MetricCard BARU (Mirip AnalisisHeaderCards)
 const MetricCard: React.FC<{
     title: string;
     value: string | number;
     icon: React.ReactNode;
-    colorClass: string; // Tambahkan colorClass
+    colorClass: string;
 }> = ({ title, value, icon, colorClass }) => {
-
     const iconElement = icon as React.ReactElement<{ className?: string }>;
 
     return (
-        <Card className="shadow-lg rounded-xl border border-gray-200">
-            <CardContent className="p-4 flex items-start space-x-4">
-
-                {/* Ikon dengan Background Solid */}
-                <div className={`text-white p-3 rounded-xl shrink-0 ${colorClass}`}>
-                    {/* Paksa ukuran ikon menjadi h-7 w-7 */}
+        <Card className="shadow-md rounded-xl border border-gray-200 overflow-hidden">
+            <CardContent className="p-3 sm:p-4 flex items-center space-x-3 sm:space-x-4">
+                {/* Ikon: Ukuran lebih kecil di mobile (h-5/w-5) dan normal di desktop (h-7/w-7) */}
+                <div className={cn("text-white p-2.5 sm:p-3 rounded-xl shrink-0", colorClass)}>
                     {React.cloneElement(iconElement, {
-                        className: `h-7 w-7 ${iconElement.props.className || ''}`
+                        className: cn("h-5 w-5 sm:h-7 sm:w-7", iconElement.props.className)
                     })}
                 </div>
 
-                {/* Konten Teks */}
-                <div className="flex flex-col justify-start min-w-0">
-                    <p className="text-base text-gray-700 font-medium mb-1 truncate">{title}</p>
-                    <h4 className="text-lg font-extrabold text-gray-900 truncate">{value}</h4>
+                {/* Konten Teks: Font size disesuaikan */}
+                <div className="flex flex-col justify-center min-w-0 flex-1">
+                    <p className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider truncate mb-0.5">
+                        {title}
+                    </p>
+                    <h4 className="text-sm sm:text-lg font-black text-gray-900 truncate leading-tight">
+                        {value}
+                    </h4>
                 </div>
             </CardContent>
         </Card>
     );
 };
-// ✅ AKHIR STRUKTUR MetricCard BARU
-
 
 export default function HeaderCards({ kuesioner, startDate, endDate }: HeaderCardsProps) {
-
-    // Hitung progress untuk menentukan warna dinamis
     const progressValue = kuesioner.progress;
     let progressColorClass = greenSolid;
+    
     if (progressValue < 50) {
         progressColorClass = yellowSolid;
     } else if (progressValue < 20) {
-        // Jika Anda ingin warna merah untuk progres sangat rendah, tambahkan di sini
-        // progressColorClass = "bg-red-600";
+        progressColorClass = "bg-red-600";
     }
 
     return (
-        // Tetap 5 kolom sesuai desain monitoring Anda
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
-
+        /* RESPONSIVE GRID:
+           - 1 kolom pada mobile sangat kecil (layar < 400px)
+           - 2 kolom pada mobile menengah (sm)
+           - 5 kolom pada desktop (lg)
+        */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-5">
             <MetricCard
                 title="Target Responden"
                 value={kuesioner.targetResponden.toLocaleString()}
                 icon={<Target />}
-                colorClass={blueSolid} // Menggunakan biru untuk Target
+                colorClass={blueSolid}
             />
 
             <MetricCard
                 title="Respon Masuk"
                 value={kuesioner.totalResponden.toLocaleString()}
                 icon={<CheckCheck />}
-                colorClass={greenSolid} // Menggunakan hijau untuk Respon
+                colorClass={greenSolid}
             />
 
             <MetricCard
                 title="Pencapaian"
                 value={`${progressValue.toFixed(1)} %`}
                 icon={<Percent />}
-                colorClass={progressColorClass} // Warna dinamis berdasarkan progress
+                colorClass={progressColorClass}
             />
 
             <MetricCard
@@ -117,7 +113,6 @@ export default function HeaderCards({ kuesioner, startDate, endDate }: HeaderCar
                 icon={<Calendar />}
                 colorClass={greenSolid}
             />
-
         </div>
     );
 }

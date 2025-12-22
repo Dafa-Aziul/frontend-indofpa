@@ -1,7 +1,6 @@
-// fileName: src/pages/admin/dashboard/index.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDashboard } from "@/features/dashboard/hooks/useDashboard";
 import SummaryCards from "@/features/dashboard/components/SummaryCards";
 import TrendChart from "@/features/dashboard/components/TrendChart";
@@ -12,183 +11,149 @@ import { TrendChartSkeleton } from "@/features/dashboard/components/skeletons/Tr
 import { SummaryCardsSkeleton } from "@/features/dashboard/components/skeletons/SummaryCardsSkeleton";
 import { DistributionChartSkeleton } from "@/features/dashboard/components/skeletons/DistributionChartSkeleton";
 import PageHeader from "@/components/common/page-header";
-import React from "react"; // Tambahkan import React jika belum ada di file typeskrip Anda
+import { Loader2, RefreshCw } from "lucide-react";
 
 export default function DashboardPage() {
-    const { data, loading } = useDashboard();
+    // 1. Hook Dashboard (Polling Real-time)
+    const { data, loading, isRefetching, refreshManual } = useDashboard();
 
-    const [userName, setUserName] = useState<string | null>(null);
-    // State untuk mengontrol penundaan minimal
-    const [isDelayElapsed, setIsDelayElapsed] = useState(false); 
+    // 2. State Management
+    const [userName, setUserName] = useState<string>("");
+    const [isMounted, setIsMounted] = useState(false);
 
-    // 1. Ambil nama user dari localStorage (client only)
+    // Inisialisasi visualLoading sesuai dengan initial loading state
+    const [visualLoading, setVisualLoading] = useState(true);
+
+    // 3. FIX: Menghilangkan Cascading Render pada Mounting & LocalStorage
     useEffect(() => {
-        const id = requestAnimationFrame(() => {
-            const saved = localStorage.getItem("user");
+        // Gunakan setTimeout 0 untuk memindahkan eksekusi ke macrotask queue
+        // Ini memberi waktu React menyelesaikan fase commit render pertama
+        const timeout = setTimeout(() => {
+            setIsMounted(true);
+            const saved = window.localStorage.getItem("user");
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    setUserName(parsed.name);
-                } catch { }
+                    if (parsed.name) setUserName(parsed.name);
+                } catch (e) {
+                    console.error("Failed to parse user", e);
+                }
             }
-        });
+        }, 0);
 
-        return () => cancelAnimationFrame(id);
+        return () => clearTimeout(timeout);
     }, []);
 
-    // 2. Logika Penundaan Minimal untuk Smooth Transition
+    // 4. FIX: Menghilangkan Cascading Render pada Loading Logic
+    // 4. FIX FINAL: Loading Logic TANPA Cascading Render
     useEffect(() => {
-        let timer: NodeJS.Timeout | null = null;
-        
-        // Kasus 1: Sedang Loading (Mulai hitung delay minimal)
-        if (loading) {
-            setIsDelayElapsed(false);
-            timer = setTimeout(() => {
-                // Setelah 300ms, izinkan konten untuk muncul
-                setIsDelayElapsed(true);
-            }, 300); 
-        } 
-        
-        // Kasus 2: Loading Selesai (Data sudah ada atau ada error)
+        let timeoutId: NodeJS.Timeout | null = null;
+
         if (!loading) {
-             // Langsung set true agar konten segera ditampilkan
-             setIsDelayElapsed(true);
+            // Delay agar skeleton tidak flicker
+            timeoutId = setTimeout(() => {
+                setVisualLoading(false);
+            }, 300);
+        } else {
+            // Saat loading dimulai, langsung tampilkan skeleton
+            timeoutId = setTimeout(() => {
+                setVisualLoading(true);
+            }, 0);
         }
 
-        // Cleanup: Bersihkan timer
         return () => {
-            if (timer) {
-                clearTimeout(timer);
-            }
+            if (timeoutId) clearTimeout(timeoutId);
         };
-    }, [loading]); 
-    
-    // Tentukan apakah kita harus menampilkan Skeleton
-    const showLoading = loading || !isDelayElapsed;
+    }, [loading]);
 
 
-    // ============================
-    // LOADING UI
-    // ============================
-    if (showLoading) {
-        return (
-            // Tambahkan transisi opacity pada container skeleton
-            <div className="space-y-10 transition-opacity duration-300"> 
-                {/* Menggunakan PageHeader untuk konsistensi di loading state */}
-                <PageHeader className="pb-6"
-                    title={userName ? `Selamat datang, ${userName}` : "Selamat Datang"}
-                    description="Berikut ringkasan aktivitas dan performa kuisioner Anda. Pantau perkembangan responden dan analisis data terbaru secara langsung dari dashboard ini."
-                />
-                
-                <Card className="shadow-sm border rounded-xl">
-                    <CardHeader>
-                        <CardTitle className="text-2xl font-bold">Aktivitas 30 Hari Terakhir</CardTitle>
-                        <p className="text-muted-foreground">
-                            Grafik tren responden berdasarkan aktivitas terbaru
-                        </p>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                        <TrendChartSkeleton />
-                    </CardContent>
-                </Card>
+    // 5. Derived State & Hydration Guard
+    const displayTitle = useMemo(() => {
+        // Selama belum mounted (di server), tampilkan default untuk cegah hydration error
+        if (!isMounted) return "Selamat Datang";
+        return userName ? `Halo, ${userName.split(" ")[0]}!` : "Selamat Datang";
+    }, [isMounted, userName]);
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    <Card className="shadow-sm border rounded-xl">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold">Ringkasan Kuisioner</CardTitle>
-                            <p className="text-muted-foreground">
-                                Statistik penting dari seluruh kuisioner Anda
-                            </p>
-                        </CardHeader>
-                        <CardContent className="pt-4">
-                            <SummaryCardsSkeleton />
-                        </CardContent>
-                    </Card>
+    const showLoading = loading || visualLoading;
 
-                    <Card className="shadow-sm border rounded-xl">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold">Distribusi Responden</CardTitle>
-                            <p className="text-muted-foreground">
-                                Perbandingan jumlah responden
-                            </p>
-                        </CardHeader>
-                        <CardContent className="pt-2">
-                            <DistributionChartSkeleton />
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        );
-    }
-
-    // ============================
-    // DATA KOSONG
-    // ============================
-    if (!data) {
-        return (
-            <div className="p-6 text-center text-muted-foreground opacity-0 animate-fadeIn">
-                Data tidak ditemukan
-            </div>
-        );
-    }
-
-    // ============================
-    // MAIN CONTENT
-    // ============================
     return (
-        // ✅ Tambahkan class untuk fade-in pada container utama
-        <div className="opacity-0 animate-fadeIn">
-            
-            {/* Header Section */}
-            <PageHeader className="pb-6"
-                title={userName ? `Selamat datang, ${userName}`: "Selamat Datang"}
-                description="Berikut ringkasan aktivitas dan performa kuisioner Anda. Pantau perkembangan responden dan analisis data terbaru secara langsung dari dashboard ini."
-            />
-            {/* CONTENT SECTION */}
-            <div className="space-y-10">
+        <div className="pb-10 px-0 sm:px-4 animate-in fade-in duration-500">
+            {/* ================= HEADER ================= */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <PageHeader
+                    className="pb-0"
+                    title={displayTitle}
+                    description="Pantau statistik kuesioner Anda secara langsung."
+                />
 
-                {/* Trend Chart */}
-                <Card className="shadow-sm border rounded-xl">
-                    <CardHeader>
-                        <CardTitle className="text-2xl font-bold">
-                            Aktivitas 30 Hari Terakhir
+                <div className="flex items-center gap-2 self-start sm:self-center">
+                    {isRefetching ? (
+                        <div className="flex items-center gap-2 text-[10px] text-green-600 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            <span className="font-semibold uppercase tracking-tight">Sinkronisasi...</span>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => refreshManual?.()}
+                            className="flex items-center gap-2 text-[10px] text-gray-500 hover:text-green-600 bg-white px-3 py-1.5 rounded-full border border-gray-200 transition-colors"
+                        >
+                            <RefreshCw className="h-3 w-3" />
+                            <span className="font-medium uppercase tracking-wider">Update</span>
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* ================= CONTENT ================= */}
+            <div className="space-y-6 md:space-y-10">
+                {/* 1. Trend Chart */}
+                <Card className="shadow-sm border-none sm:border rounded-xl overflow-hidden bg-white">
+                    <CardHeader className="p-4 md:p-6 border-b bg-gray-50/30">
+                        <CardTitle className="text-lg md:text-xl font-bold text-green-900 font-mono">
+                            AKTIVITAS 30 HARI TERAKHIR
                         </CardTitle>
-                        <p className="text-muted-foreground">
-                            Grafik tren responden berdasarkan aktivitas terbaru
-                        </p>
                     </CardHeader>
-                    <CardContent className="pt-4">
-                        <TrendChart data={data.last30Days} />
+                    <CardContent className="p-2 md:p-6 pt-6">
+                        {showLoading ? <TrendChartSkeleton /> : <TrendChart data={data?.last30Days || []} />}
                     </CardContent>
                 </Card>
 
-                {/* Summary & Pie Chart */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    <Card className="shadow-sm border rounded-xl">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold">Ringkasan Kuisioner</CardTitle>
-                            <p className="text-muted-foreground">
-                                Statistik penting dari seluruh kuisioner Anda
-                            </p>
+                {/* 2. Grid Summary & Distribution */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">
+                    <Card className="shadow-sm border-none sm:border rounded-xl bg-white">
+                        <CardHeader className="p-4 md:p-6 pb-2">
+                            <CardTitle className="text-lg md:text-xl font-bold">Ringkasan Kuesioner</CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-4"> 
-                            <SummaryCards summary={data.summary} />
+                        <CardContent className="p-4 md:p-6 pt-0 font-medium">
+                            {showLoading ? (
+                                <SummaryCardsSkeleton />
+                            ) : data?.summary ? (
+                                <SummaryCards summary={data.summary} />
+                            ) : (
+                                <div className="text-center py-6 text-sm text-gray-400">Data kuesioner tidak ditemukan.</div>
+                            )}
                         </CardContent>
                     </Card>
 
-                    <Card className="shadow-sm border rounded-xl">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold">Distribusi Responden</CardTitle>
-                            <p className="text-muted-foreground">
-                                Perbandingan jumlah responden pada kuisioner aktif
-                            </p>
+                    <Card className="shadow-sm border-none sm:border rounded-xl bg-white">
+                        <CardHeader className="p-4 md:p-6 pb-2">
+                            <CardTitle className="text-lg md:text-xl font-bold">Distribusi Responden</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <DistributionChart data={data.distribution} />
+                        <CardContent className="p-2 md:p-6 pt-0 flex items-center justify-center min-h-[300px]">
+                            {showLoading ? (
+                                <DistributionChartSkeleton />
+                            ) : data?.distribution ? (
+                                <DistributionChart data={data.distribution} />
+                            ) : (
+                                <div className="text-sm text-gray-400 italic font-medium tracking-tight">Belum ada data distribusi.</div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
             </div>
+
+            {/* Spacer mobile */}
+            <div className="h-10 md:hidden" />
         </div>
     );
 }

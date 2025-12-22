@@ -1,35 +1,30 @@
 import { z } from "zod";
 
-/* ================= KUESIONER (CREATE / EDIT) ================= */
-
 export const kuesionerSchema = z.object({
-  judul: z.string().min(3, "Judul minimal 3 karakter"),
+  judul: z.string().trim().min(3, "Judul minimal 3 karakter"),
 
-  tujuan: z.string().min(5, "Tujuan minimal 5 karakter"),
+  tujuan: z.string().trim().min(5, "Tujuan minimal 5 karakter"),
 
-  manfaat: z.string().min(5, "Manfaat minimal 5 karakter"),
+  manfaat: z.string().trim().min(5, "Manfaat minimal 5 karakter"),
 
+  // 💡 Solusi: Gunakan properti 'message' saja atau langsung di dalam .min()
   kategoriId: z
-    .number({
-      error: (issue) =>
-        issue.input === undefined
-          ? "Kategori wajib dipilih"
-          : "Kategori tidak valid",
-    })
+    .number({ message: "Kategori wajib dipilih" })
     .min(1, "Kategori wajib dipilih"),
 
-  estimasiMenit: z.number().min(1, "Estimasi minimal 1 menit"),
+  estimasiMenit: z
+    .number({ message: "Estimasi harus berupa angka" })
+    .min(1, "Estimasi minimal 1 menit"),
 
-  targetResponden: z.number().min(1, "Target responden minimal 1"),
+  targetResponden: z
+    .number({ message: "Target harus berupa angka" })
+    .min(1, "Target responden minimal 1"),
 });
 
 export type KuesionerFormValues = z.infer<typeof kuesionerSchema>;
 
-/* ================= DISTRIBUSI KUESIONER ================= */
+/* ================= DISTRIBUSI ================= */
 
-/**
- * Strict date format: yyyy-MM-dd
- */
 const dateStringSchema = z
   .string()
   .min(1, "Tanggal wajib diisi")
@@ -41,8 +36,11 @@ export const kuesionerDistribusiSchema = z
     tanggalSelesai: dateStringSchema,
   })
   .refine(
-    (data) =>
-      new Date(data.tanggalMulai) <= new Date(data.tanggalSelesai),
+    (data) => {
+      const start = new Date(data.tanggalMulai).getTime();
+      const end = new Date(data.tanggalSelesai).getTime();
+      return start <= end;
+    },
     {
       message: "Tanggal selesai harus setelah atau sama dengan tanggal mulai",
       path: ["tanggalSelesai"],

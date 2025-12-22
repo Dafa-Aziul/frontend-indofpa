@@ -1,61 +1,31 @@
-// fileName: indikator-form-modal.tsx
 "use client";
 
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useRef } from "react";
+import { useForm, useWatch, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
+import { 
+    Dialog, DialogContent, DialogHeader, DialogTitle, 
+    DialogDescription, DialogFooter 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-import {
-    Field,
-    FieldGroup,
-    FieldLabel,
-    FieldDescription,
-} from "@/components/ui/field";
-
-import {
-    indikatorSchema,
-    IndikatorFormValues,
-} from "../schemas";
+import { 
+    Select, SelectContent, SelectItem, 
+    SelectTrigger, SelectValue 
+} from "@/components/ui/select";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { IndikatorFormExtendedSchema, IndikatorFormExtendedValues } from "../schemas";
 import { Variabel } from "../types";
-
-// Current usage (Compatible with Zod v3 and v4 for number validation)
-const IndikatorFormExtendedSchema = indikatorSchema.extend({
-    variabelId: z
-        .number({
-            error: (issue) =>
-                issue.input === undefined || issue.input === 0
-                    ? "Variabel wajib dipilih"
-                    : "Variabel harus berupa angka",
-        })
-        .int()
-        .min(1, "Variabel wajib dipilih"),
-});
-
-type IndikatorFormExtendedValues = z.infer<typeof IndikatorFormExtendedSchema>;
 
 type Props = {
     open: boolean;
-    defaultValues?: IndikatorFormValues & { variabelId: number };
+    defaultValues?: Partial<IndikatorFormExtendedValues>;
     isSubmitting?: boolean;
     onClose: () => void;
     onSubmit: (values: IndikatorFormExtendedValues) => void;
     variabelList: Variabel[];
     isEditMode: boolean;
 };
-
 
 export function IndikatorFormModal({
     open,
@@ -67,107 +37,78 @@ export function IndikatorFormModal({
     isEditMode,
 }: Props) {
     const {
+        control,
         register,
         handleSubmit,
-        reset, // Ambil fungsi reset
+        reset,
         setValue,
-        // ✅ WATCH NILAI VARIABELID DARI RHF
-        watch,
         formState: { errors },
     } = useForm<IndikatorFormExtendedValues>({
         resolver: zodResolver(IndikatorFormExtendedSchema),
-        mode: "onChange", // Mengubah mode validasi agar lebih responsif terhadap setValue
-        defaultValues: {
-            kode: "",
-            nama: "",
-            variabelId: 0,
-        },
+        defaultValues: { kode: "", nama: "", variabelId: 0 },
     });
 
-    // ✅ Panggil watch untuk variabelId
-    const watchedVariabelId = watch('variabelId');
+    const watchedVariabelId = useWatch({ control, name: "variabelId" });
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-
-    /* ================= MANUAL REGISTER ================= */
     useEffect(() => {
-        // Daftarkan variabelId ke RHF di awal
-        register('variabelId', { required: true, valueAsNumber: true });
-    }, [register]);
-
-
-    /* ================= SYNC EDIT DATA ================= */
-    useEffect(() => {
-        // Ini digunakan untuk memuat data edit atau menginisialisasi nilai default
-        reset(
-            defaultValues ?? {
-                kode: "",
-                nama: "",
-                variabelId: 0,
-            }
-        );
-    }, [defaultValues, reset]);
-    
-    /* ✅ PERBAIKAN: RESET FORM SAAT MODAL DITUTUP */
-    useEffect(() => {
-        // Panggil reset ke nilai default/kosong RHF ketika prop 'open' menjadi false
-        if (!open) {
-            reset(); 
+        if (open) {
+            reset(defaultValues ?? { kode: "", nama: "", variabelId: 0 });
+        } else {
+            reset();
         }
-    }, [open, reset]);
+    }, [open, defaultValues, reset]);
 
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLButtonElement>) => {
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+        if (!isMobile) return;
 
-    // Handle submit form
-    const handleFormSubmit = (values: IndikatorFormExtendedValues) => {
-        onSubmit(values);
+        const target = e.target;
+
+        if (target instanceof HTMLInputElement && target.type === "number" && target.value === "0") {
+            const name = target.name as Path<IndikatorFormExtendedValues>;
+            setValue(name, "");
+        }
+
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.style.paddingBottom = "280px";
+            setTimeout(() => {
+                target.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+        }
     };
 
+    const handleBlur = () => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.style.paddingBottom = "20px";
+        }
+    };
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={(isOpen) => {
-                if (!isOpen) onClose();
-            }}
-        >
-            <DialogContent className="max-w-md">
-                <form onSubmit={handleSubmit(handleFormSubmit)}>
-                    <FieldGroup>
-                        <DialogHeader>
-                            <DialogTitle>
-                                {isEditMode ? "Edit Indikator" : "Tambah Indikator"}
-                            </DialogTitle>
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+            <DialogContent className="w-[95vw] sm:max-w-md p-0 flex flex-col overflow-hidden top-[45%] sm:top-[50%] transition-all">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col min-h-0">
+                    <DialogHeader className="p-4 sm:p-6 border-b bg-white shrink-0 relative z-50">
+                        <DialogTitle className="text-base sm:text-lg">
+                            {isEditMode ? "Edit Indikator" : "Tambah Indikator"}
+                        </DialogTitle>
+                        <DialogDescription className="text-xs text-muted-foreground mt-1">
+                            {isEditMode ? "Perbarui informasi indikator." : "Lengkapi data indikator kuesioner."}
+                        </DialogDescription>
+                    </DialogHeader>
 
-                            <DialogDescription>
-                                {isEditMode
-                                    ? "Perbarui informasi indikator."
-                                    : "Lengkapi data indikator untuk variabel terpilih."}
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        {/* ================= VARIABEL ID (SELECT) ================= */}
+                    <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 transition-all duration-300">
                         <Field>
-                            <FieldLabel htmlFor="variabelId">Variabel Induk</FieldLabel>
+                            <FieldLabel className="text-xs font-bold uppercase text-gray-500 tracking-wider">Variabel Induk</FieldLabel>
                             <Select
-                                onValueChange={(value) => {
-                                    // 1. Set nilai (memicu update state RHF & watch)
-                                    setValue("variabelId", Number(value), { shouldValidate: true });
-                                }}
-                                // ✅ GUNAKAN NILAI YANG DI-WATCH (SUMBER TUNGGAL DARI RHF)
-                                value={String(watchedVariabelId)}
+                                value={watchedVariabelId ? String(watchedVariabelId) : ""}
+                                onValueChange={(v) => setValue("variabelId", Number(v), { shouldValidate: true })}
                                 disabled={isEditMode}
                             >
-                                <SelectTrigger
-                                    onBlur={() => {
-                                        // Optional: Jika mode validasi bukan onChange
-                                    }}
-                                >
-                                    {/* SelectValue akan menampilkan opsi yang cocok dengan nilai watchedVariabelId */}
+                                <SelectTrigger className="h-9 mt-1" onFocus={handleFocus}>
                                     <SelectValue placeholder="Pilih Variabel" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {!isEditMode && (
-                                        <SelectItem value="0" disabled>Pilih Variabel</SelectItem>
-                                    )}
                                     {variabelList.map((v) => (
                                         <SelectItem key={v.variabelId} value={String(v.variabelId)}>
                                             [{v.kode}] {v.nama}
@@ -175,53 +116,44 @@ export function IndikatorFormModal({
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <FieldDescription>
-                                {/* Pesan error seharusnya muncul jika watchedVariabelId masih 0 atau tidak valid */}
-                                {errors.variabelId?.message}
-                            </FieldDescription>
+                            {errors.variabelId && <p className="text-red-500 text-[10px] mt-1 font-medium">{errors.variabelId.message}</p>}
                         </Field>
 
-                        {/* ================= KODE ================= */}
                         <Field>
-                            <FieldLabel htmlFor="kode">Kode Indikator</FieldLabel>
+                            <FieldLabel className="text-xs font-bold uppercase text-gray-500 tracking-wider">Kode Indikator</FieldLabel>
                             <Input
                                 id="kode"
                                 placeholder="Contoh: I1.1"
+                                className="h-9 mt-1"
                                 {...register("kode")}
+                                onFocus={handleFocus}
+                                onBlur={handleBlur}
+                                autoComplete="off"
                             />
-                            <FieldDescription>
-                                {errors.kode?.message}
-                            </FieldDescription>
+                            {errors.kode && <p className="text-red-500 text-[10px] mt-1 font-medium">{errors.kode.message}</p>}
                         </Field>
 
-                        {/* ================= NAMA ================= */}
                         <Field>
-                            <FieldLabel htmlFor="nama">Nama Indikator</FieldLabel>
+                            <FieldLabel className="text-xs font-bold uppercase text-gray-500 tracking-wider">Nama Indikator</FieldLabel>
                             <Input
                                 id="nama"
                                 placeholder="Contoh: Pegawai cepat tanggap"
+                                className="h-9 mt-1"
                                 {...register("nama")}
+                                onFocus={handleFocus}
+                                onBlur={handleBlur}
+                                autoComplete="off"
                             />
-                            <FieldDescription>
-                                {errors.nama?.message}
-                            </FieldDescription>
+                            {errors.nama && <p className="text-red-500 text-[10px] mt-1 font-medium">{errors.nama.message}</p>}
                         </Field>
+                    </div>
 
-                        {/* ================= ACTION ================= */}
-                        <DialogFooter className="pt-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={onClose}
-                            >
-                                Batal
-                            </Button>
-
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isEditMode ? "Simpan Perubahan" : "Tambah Indikator"}
-                            </Button>
-                        </DialogFooter>
-                    </FieldGroup>
+                    <DialogFooter className="p-4 border-t bg-gray-50 flex flex-row gap-2 shrink-0 z-50">
+                        <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-9 text-sm">Batal</Button>
+                        <Button type="submit" disabled={isSubmitting} className="flex-1 h-9 text-sm">
+                            {isSubmitting ? "..." : (isEditMode ? "Simpan" : "Tambah")}
+                        </Button>
+                    </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>

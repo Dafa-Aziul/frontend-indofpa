@@ -29,15 +29,13 @@ export const PublicDetailView = ({ id }: { id: string }) => {
 
     // Penyesuaian akses data sesuai struktur JSON terbaru
     const kuesioner = data?.kuesioner;
-    
-    // Mengambil kode akses dari array distribusi pertama
-    // JSON: "distribusi": [{ "kodeAkses": "25766498" }]
+
     const kodeAkses = kuesioner?.distribusi?.[0]?.kodeAkses;
 
     if (isError || !kuesioner) {
         return (
             <div className="max-w-md mx-auto mt-20 text-center px-4">
-                <div className="bg-red-50 text-red-600 p-8 rounded-[2rem] border border-red-100 shadow-sm">
+                <div className="bg-red-50 text-red-600 p-8 rounded-4xl border border-red-100 shadow-sm">
                     <Info className="mx-auto mb-4 opacity-50" size={48} />
                     <p className="font-bold text-lg mb-2">Oops!</p>
                     <p className="text-sm opacity-80">Data kuesioner tidak ditemukan atau sudah tidak aktif.</p>
@@ -65,7 +63,7 @@ export const PublicDetailView = ({ id }: { id: string }) => {
                     <div className="relative z-10">
                         <div className="flex flex-wrap gap-2 mb-6">
                             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest border border-white/30">
-                                {kuesioner.kategori?.nama || "Umum"}
+                                {kuesioner.kategori?.nama}
                             </div>
                             {kodeAkses && (
                                 <div className="inline-flex items-center gap-1.5 bg-emerald-700/40 backdrop-blur-md text-[10px] font-bold px-4 py-2 rounded-full border border-emerald-400/30">
@@ -82,7 +80,7 @@ export const PublicDetailView = ({ id }: { id: string }) => {
                     <div className="absolute -top-10 -right-10 w-64 h-64 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50" />
                 </div>
 
-                <div className="p-8 md:p-12 bg-gradient-to-b from-white to-emerald-50/20">
+                <div className="p-8 md:p-12 bg-linear-to-b from-white to-emerald-50/20">
                     {/* Statistik Info: Estimasi & Target */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                         <div className="group flex items-center gap-5 p-6 bg-white rounded-3xl border border-emerald-100 shadow-sm hover:border-emerald-300 transition-all">
@@ -115,10 +113,10 @@ export const PublicDetailView = ({ id }: { id: string }) => {
                                 </div>
                                 <h4 className="text-xl font-black text-gray-900 uppercase tracking-tight">Tujuan Penelitian</h4>
                             </div>
-                            <div className="bg-white p-8 rounded-[2rem] border-2 border-emerald-50 shadow-inner relative">
+                            <div className="bg-white p-8 rounded-4xl border-2 border-emerald-50 shadow-inner relative">
                                 <span className="absolute -top-4 left-8 bg-emerald-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Description</span>
                                 <p className="text-gray-700 leading-relaxed font-semibold italic text-xl">
-                                    "{kuesioner.tujuan}"
+                                    {kuesioner.tujuan}
                                 </p>
                             </div>
                         </section>
@@ -132,14 +130,29 @@ export const PublicDetailView = ({ id }: { id: string }) => {
                                 <h4 className="text-xl font-black text-gray-900 uppercase tracking-tight">Manfaat</h4>
                             </div>
                             <div className="px-4">
-                                <p className="text-gray-600 leading-relaxed font-medium">
-                                    {kuesioner.manfaat}
-                                </p>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {kuesioner.manfaat ? (
+                                        kuesioner.manfaat.split(',').map((item: string, index: number) => (
+
+                                            <div
+                                                key={index}
+                                                className="flex items-start gap-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50 hover:bg-blue-50 transition-colors"
+                                            >
+                                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
+                                                <p className="text-gray-700 leading-relaxed font-medium">
+                                                    {item.trim()}
+                                                </p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-400 italic">Tidak ada manfaat yang spesifik.</p>
+                                    )}
+                                </div>
                             </div>
                         </section>
 
                         {/* Jaminan Privasi */}
-                        <div className="flex gap-6 p-8 bg-amber-50/50 rounded-[2rem] border border-amber-100 items-start shadow-sm">
+                        <div className="flex gap-6 p-8 bg-amber-50/50 rounded-4xl border border-amber-100 items-start shadow-sm">
                             <div className="p-3 bg-white rounded-2xl text-amber-600 shadow-sm">
                                 <ShieldCheck size={32} />
                             </div>

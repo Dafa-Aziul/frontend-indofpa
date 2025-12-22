@@ -1,4 +1,3 @@
-// fileName: hooks.ts
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -29,10 +28,6 @@ import {
   indikatorSchema,
 } from "./schemas";
 
-/* ======================================================
-   API ERROR HANDLING HELPER (PLACEHOLDER)
-====================================================== */
-// Ganti dengan implementasi Anda yang sesungguhnya
 function getApiErrorMessage(
   error: unknown,
   defaultMessage: string = "Terjadi kesalahan"
@@ -44,7 +39,7 @@ function getApiErrorMessage(
 }
 
 /* ======================================================
-   KUESIONER DETAIL (SOURCE OF TRUTH)
+    KUESIONER DETAIL (SOURCE OF TRUTH)
 ====================================================== */
 
 export function useKuesionerDetail(id: number) {
@@ -70,8 +65,6 @@ export function useKuesionerDetail(id: number) {
     if (!id) return;
     fetchDetail();
   }, [id, fetchDetail]);
-
-  /* ================= OPTIMISTIC HELPERS ================= */
 
   const addVariabel = (row: Variabel) => {
     setData((prev) =>
@@ -157,7 +150,6 @@ export function useKuesionerDetail(id: number) {
     );
   };
 
-  // DATA DERIVED: List Indikator untuk Select
   const indikatorList = useMemo(() => {
     if (!data) return [];
     return data.indikator.map((i) => ({
@@ -185,9 +177,9 @@ export function useKuesionerDetail(id: number) {
 }
 
 /* ======================================================
-   VARIABEL CRUD (UI + API)
+    VARIABEL CRUD
 ====================================================== */
-// ... (useVariabel implementation) ...
+
 type UseVariabelProps = {
   kuesionerId: number;
   addVariabel: (v: Variabel) => void;
@@ -241,17 +233,21 @@ export function useVariabel({
       setIsSubmitting(false);
     }
   };
+
   const confirmDelete = async () => {
     if (!deleteId) return;
     const idToDelete = deleteId;
-    closeDelete();
     try {
-      deleteVariabelLocal(idToDelete);
-      await deleteVariabel(idToDelete);
+      setIsSubmitting(true);
+      await deleteVariabel(idToDelete); // 1. Hapus di Backend dulu
+      deleteVariabelLocal(idToDelete); // 2. Jika sukses, baru hapus di UI
       toast.success("Variabel berhasil dihapus");
+      closeDelete();
     } catch (e) {
       const errorMessage = getApiErrorMessage(e, "Gagal menghapus variabel");
       toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -271,9 +267,9 @@ export function useVariabel({
 }
 
 /* ======================================================
-   INDIKATOR CRUD (UI + API)
+    INDIKATOR CRUD
 ====================================================== */
-// ... (useIndikator implementation) ...
+
 const IndikatorFormExtendedSchema = indikatorSchema.extend({
   variabelId: z.number().int().min(1),
 });
@@ -340,17 +336,21 @@ export function useIndikator({
 
   const openDelete = (id: number) => setDeleteId(id);
   const closeDelete = () => setDeleteId(null);
+
   const confirmDelete = async () => {
     if (!deleteId) return;
     const idToDelete = deleteId;
-    closeDelete();
     try {
-      deleteIndikatorLocal(idToDelete);
-      await deleteIndikator(idToDelete);
+      setIsSubmitting(true);
+      await deleteIndikator(idToDelete); // 1. Hapus di Backend dulu
+      deleteIndikatorLocal(idToDelete); // 2. Jika sukses, baru hapus di UI
       toast.success("Indikator berhasil dihapus");
+      closeDelete();
     } catch (e) {
       const errorMessage = getApiErrorMessage(e, "Gagal menghapus indikator");
       toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -370,7 +370,7 @@ export function useIndikator({
 }
 
 /* ======================================================
-   PERTANYAAN CRUD (UI + API)
+    PERTANYAAN CRUD
 ====================================================== */
 
 type UsePertanyaanProps = {
@@ -418,7 +418,6 @@ export function usePertanyaan({
         return;
       }
 
-      // 1. TRANSFORMATION: Mengubah customScales array menjadi labelSkala object API
       const labelSkala: Record<string, string> = values.customScales.reduce(
         (acc, item) => {
           acc[String(item.value)] = item.label;
@@ -427,14 +426,12 @@ export function usePertanyaan({
         {} as Record<string, string>
       );
 
-      // 2. Pembentukan Payload API
       const apiPayload: PertanyaanApiPayload = {
         teksPertanyaan: values.teksPertanyaan,
         urutan: values.urutan,
         labelSkala: labelSkala,
       };
 
-      // 3. Mutasi
       if (editData && editData.pertanyaanId) {
         const res = await updatePertanyaan(editData.pertanyaanId, apiPayload);
         updatePertanyaanLocal(res);
@@ -466,14 +463,17 @@ export function usePertanyaan({
   const confirmDelete = async () => {
     if (!deleteId) return;
     const idToDelete = deleteId;
-    closeDelete();
     try {
-      deletePertanyaanLocal(idToDelete);
-      await deletePertanyaan(idToDelete);
+      setIsSubmitting(true);
+      await deletePertanyaan(idToDelete); // 1. Hapus di Backend dulu
+      deletePertanyaanLocal(idToDelete); // 2. Jika sukses, baru hapus di UI
       toast.success("Pertanyaan berhasil dihapus");
+      closeDelete();
     } catch (e) {
       const errorMessage = getApiErrorMessage(e, "Gagal menghapus pertanyaan");
       toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

@@ -6,24 +6,19 @@ import { MonitoringRow, MonitoringStatus } from "../types";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-
 interface MonitoringTableProps {
     data: MonitoringRow[];
-    // ✅ Menghapus prop isLoading karena tidak digunakan
-    // isLoading: boolean;
     page: number;
     limit: number;
     onViewDetail: (kuesionerId: number) => void;
 }
 
-// Utility untuk menentukan warna progress bar
 function getProgressColor(progress: number): string {
     if (progress >= 100) return 'bg-green-700';
     if (progress > 0) return 'bg-green-500';
     return 'bg-red-500';
 }
 
-// Utility untuk menentukan warna teks status
 function getStatusDisplay(status: MonitoringStatus | string): { label: string, color: string } {
     const lowerStatus = status.toLowerCase();
     switch (lowerStatus) {
@@ -41,18 +36,14 @@ function getStatusDisplay(status: MonitoringStatus | string): { label: string, c
 }
 
 const MonitoringTable: React.FC<MonitoringTableProps> = ({ data, page, limit }) => {
-    // Memoized data untuk progress visual
     const renderedData = useMemo(() => {
         return data.map(row => {
             const visualProgress = Math.min(row.progress, 100);
             let indicatorClass = getProgressColor(row.progress);
 
-            if (row.progress === 0) {
-                indicatorClass = 'bg-gray-300';
-            }
-            if (row.progress >= 100) {
-                indicatorClass = 'bg-green-700';
-            }
+            if (row.progress === 0) indicatorClass = 'bg-gray-300';
+            if (row.progress >= 100) indicatorClass = 'bg-green-700';
+
             return {
                 ...row,
                 visualProgress,
@@ -62,29 +53,28 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({ data, page, limit }) 
         });
     }, [data]);
 
-    // Tentukan jumlah kolom untuk colSpan
-    const colCount = 7;
     const router = useRouter();
+
     return (
-        <div className="relative w-full overflow-x-auto rounded-lg border bg-white">
+        <div className="relative w-full overflow-x-auto rounded-lg border bg-white shadow-sm">
             <Table className="min-w-full">
-                {/* Header: Menggunakan bg-accent */}
                 <TableHeader>
                     <TableRow className="bg-accent pointer-events-none">
-                        <TableHead className="w-[60px] text-center text-white font-bold">No.</TableHead>
-                        <TableHead className="min-w-[250px] text-white font-bold">Judul Kuesioner</TableHead>
+                        {/* Sembunyikan No di mobile sangat kecil */}
+                        <TableHead className="w-[50px] text-center text-white font-bold hidden sm:table-cell">No.</TableHead>
+                        <TableHead className="min-w-[180px] text-white font-bold">Judul Kuesioner</TableHead>
                         <TableHead className="text-white font-bold">Status</TableHead>
-                        <TableHead className="text-white font-bold">Target Responden</TableHead>
-                        <TableHead className="text-white font-bold">Respon Masuk</TableHead>
-                        <TableHead className="min-w-[200px] text-white font-bold">Progres Masuk</TableHead>
+                        {/* Sembunyikan Target & Respon di mobile, muncul di desktop (md+) */}
+                        <TableHead className="text-white font-bold hidden md:table-cell">Target</TableHead>
+                        <TableHead className="text-white font-bold hidden md:table-cell">Respon</TableHead>
+                        <TableHead className="min-w-[150px] text-white font-bold">Progres</TableHead>
                     </TableRow>
                 </TableHeader>
 
                 <TableBody>
-                    {/* ✅ HANYA LOGIC EMPTY STATE (Mirip KuesionerTable) */}
                     {renderedData.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={colCount} className="h-10 text-center text-muted-foreground">
+                            <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                                 Tidak ada data monitoring ditemukan.
                             </TableCell>
                         </TableRow>
@@ -94,47 +84,43 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({ data, page, limit }) 
                             return (
                                 <TableRow
                                     key={row.kuesionerId}
-                                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                                    onClick={() =>
-                                        router.push(
-                                            `/admin/monitoring/${row.kuesionerId}`
-                                        )}
+                                    className="cursor-pointer hover:bg-gray-50 transition-colors"
+                                    onClick={() => router.push(`/admin/monitoring/${row.kuesionerId}`)}
                                 >
-                                    <TableCell className="text-center">{nomor}</TableCell>
-                                    <TableCell className="font-medium">
-                                        {row.judul}
-                                        <div className="text-xs text-muted-foreground mt-1">{row.kategori}</div>
+                                    <TableCell className="text-center hidden sm:table-cell">{nomor}</TableCell>
+                                    <TableCell className="max-w-[200px] sm:max-w-none">
+                                        <div className="font-semibold text-sm sm:text-base break-words line-clamp-2 sm:line-clamp-none">
+                                            {row.judul}
+                                        </div>
+                                        <div className="text-[10px] sm:text-xs text-muted-foreground mt-1 bg-gray-100 w-fit px-2 py-0.5 rounded italic">
+                                            {row.kategori}
+                                        </div>
+                                        {/* Tampilkan info ringkas target/respon hanya di mobile */}
+                                        <div className="md:hidden text-[10px] text-muted-foreground mt-1">
+                                            Target: {row.targetResponden} | Respon: {row.responMasuk}
+                                        </div>
                                     </TableCell>
 
-                                    {/* Status */}
-                                    <TableCell className={row.statusDisplay.color}>
+                                    <TableCell className={`text-xs sm:text-sm ${row.statusDisplay.color}`}>
                                         {row.statusDisplay.label}
                                     </TableCell>
 
-                                    {/* Target Responden */}
-                                    <TableCell>{row.targetResponden.toLocaleString()}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{row.targetResponden.toLocaleString()}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{row.responMasuk.toLocaleString()}</TableCell>
 
-                                    {/* Respon Masuk */}
-                                    <TableCell>{row.responMasuk.toLocaleString()}</TableCell>
-
-                                    {/* Progres Masuk Column */}
                                     <TableCell onClick={(e) => e.stopPropagation()}>
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex-1 min-w-[120px] relative">
-                                                {/* Progress Bar */}
-
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                            <div className="flex-1 min-w-[80px] sm:min-w-[120px] relative">
                                                 <Progress
                                                     value={row.visualProgress}
-                                                    className="h-2 bg-gray-200"
+                                                    className="h-1.5 sm:h-2 bg-gray-200"
                                                     indicatorClassName={row.indicatorClass}
                                                 />
-                                                {/* Bar Nol Persen (simulasi titik merah) */}
                                                 {row.progress === 0 && (
-                                                    <div className="absolute top-0 h-full w-2 bg-red-500 rounded-full" style={{ left: '0%' }}></div>
+                                                    <div className="absolute top-0 h-full w-1.5 bg-red-500 rounded-full" style={{ left: '0%' }}></div>
                                                 )}
                                             </div>
-                                            {/* Nilai Persentase */}
-                                            <span className={`text-sm font-semibold whitespace-nowrap
+                                            <span className={`text-[10px] sm:text-sm font-bold whitespace-nowrap
                                                 ${row.progress >= 100 ? 'text-green-600' : 'text-gray-800'}`}>
                                                 {row.progress.toFixed(0)} %
                                             </span>

@@ -62,7 +62,7 @@ export function LoginForm() {
         if (data.remember) localStorage.setItem("remember_email", data.email);
         else localStorage.removeItem("remember_email");
 
-        const res = await login(data.email, data.password, data.remember);
+        const res = await login(data.email, data.password, data.remember ?? false);
 
         if (!res.success) {
             setServerError(res.error ?? "Terjadi kesalahan");

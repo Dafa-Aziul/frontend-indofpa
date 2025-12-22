@@ -13,38 +13,40 @@ import {
 
 type Props = {
     open: boolean;
+    judul: string; // Tambahkan prop judul agar lebih informatif
     onCancel: () => void;
     onConfirm: () => void;
 };
 
 export default function KuesionerDeleteDialog({
     open,
+    judul,
     onCancel,
     onConfirm,
 }: Props) {
     return (
         <AlertDialog open={open} onOpenChange={onCancel}>
-            <AlertDialogContent>
+            <AlertDialogContent className="w-[95vw] sm:max-w-[425px]">
                 <AlertDialogHeader>
                     <AlertDialogTitle>
-                        Hapus kategori?
+                        Hapus Kuesioner {judul}?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                        Tindakan ini bersifat permanen. Kuesioner yang dihapus
-                        tidak dapat dikembalikan dan dapat memengaruhi data
-                        kuesioner yang terkait.
+                        Tindakan ini bersifat permanen. Menghapus kuesioner ini akan menghapus
+                        **seluruh variabel, indikator, dan pertanyaan** yang ada di dalamnya.
+                        Data yang sudah dihapus tidak dapat dikembalikan.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
-                <AlertDialogFooter>
-                    <AlertDialogCancel>
+                <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
+                    <AlertDialogCancel onClick={onCancel}>
                         Batal
                     </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
                         className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
                     >
-                        Hapus
+                        Hapus Permanen
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

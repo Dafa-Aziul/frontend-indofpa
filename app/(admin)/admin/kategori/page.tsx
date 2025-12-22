@@ -29,6 +29,9 @@ export default function KategoriPage() {
         return <ErrorState onRetry={state.refetch} />;
     }
 
+    const kategoriToDelete = state.data.find(
+        (item) => item.kategoriId === state.deleteId
+    );
     return (
         <>
             <PageHeader
@@ -106,6 +109,7 @@ export default function KategoriPage() {
                 />
 
                 <KategoriDeleteDialog
+                    nama={kategoriToDelete?.nama || ""}
                     open={!!state.deleteId}
                     onCancel={() => state.setDeleteId(null)}
                     onConfirm={state.confirmDelete}

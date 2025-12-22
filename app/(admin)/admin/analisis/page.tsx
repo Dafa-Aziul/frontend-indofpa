@@ -60,7 +60,7 @@ export default function AnalisisPage() {
                         />
                     </div>
                 </CardHeader>
-                <CardContent className="space-y-4 p-0 sm:p-6 sm:pb-4 pb-4">
+                <CardContent className="space-y-4 p-4 sm:p-6 sm:pb-4 pb-4">
 
                     <div className="w-full">
                         <AnalisisTable

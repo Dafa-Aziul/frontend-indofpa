@@ -12,18 +12,13 @@ export const PublicListView = () => {
         return new Date(dateStr).toLocaleDateString('id-ID', {
             day: 'numeric',
             month: 'short',
-            year: 'numeric' 
+            year: 'numeric'
         });
     };
-
-    /**
-     * Fungsi untuk memotong teks:
-     * Jika panjang > 100, potong dan tambah "...."
-     */
     const truncateText = (text: string, maxLength: number) => {
         if (!text) return "";
-        return text.length > maxLength 
-            ? text.substring(0, maxLength) + "...." 
+        return text.length > maxLength
+            ? text.substring(0, maxLength) + "...."
             : text;
     };
 
@@ -57,7 +52,7 @@ export const PublicListView = () => {
                         <div className="flex justify-between items-start mb-4">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 uppercase tracking-wider border border-emerald-100">
                                 <Tag size={12} />
-                                {item.kategori}
+                                {item.kategori.nama}
                             </span>
                         </div>
 
@@ -67,7 +62,7 @@ export const PublicListView = () => {
                         </h3>
 
                         {/* Tujuan dengan Truncate 100 Karakter */}
-                        <p className="text-sm text-gray-500 mb-6 italic min-h-[40px]">
+                        <p className="text-sm text-gray-500 mb-6 italic min-h-10">
                             {truncateText(item.tujuan, 100)}
                         </p>
 
@@ -78,7 +73,7 @@ export const PublicListView = () => {
                                     <Calendar size={14} />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] text-gray-400 uppercase font-bold text-[8px]">Periode Mulai</p>
+                                    <p className="text-[8px] text-gray-400 uppercase font-bold ">Periode Mulai</p>
                                     <p className="font-semibold">{formatDate(item.tanggalMulai)}</p>
                                 </div>
                             </div>
@@ -87,7 +82,7 @@ export const PublicListView = () => {
                                     <Calendar size={14} />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] text-gray-400 uppercase font-bold text-[8px]">Periode Selesai</p>
+                                    <p className="text-[8px] text-gray-400 uppercase font-bold">Periode Selesai</p>
                                     <p className="font-semibold">{formatDate(item.tanggalSelesai)}</p>
                                 </div>
                             </div>

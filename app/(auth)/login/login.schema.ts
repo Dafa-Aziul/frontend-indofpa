@@ -1,19 +1,16 @@
-// features/auth/schemas/login.schema.ts
 import { z } from "zod";
 
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, "Email tidak boleh kosong")
+    .min(1, "Email wajib diisi")
     .email("Format email tidak valid"),
-
   password: z
     .string()
-    .min(1, "Password tidak boleh kosong")
-    .min(6, "Password minimal 6 karakter"),
-
-  remember: z.boolean().default(false),   // FIX UTAMA
+    .min(1, "Password wajib diisi")
+    .min(6, "Minimal 6 karakter"),
+  remember: z.boolean().optional(),
 });
 
-// Type infer → remember: boolean (bukan opsional)
+// Infer tipe data secara otomatis agar sinkron 100%
 export type LoginSchema = z.infer<typeof loginSchema>;

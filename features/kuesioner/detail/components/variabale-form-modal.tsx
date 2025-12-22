@@ -1,7 +1,6 @@
-// fileName: variabale-form-modal.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -18,9 +17,7 @@ import { Input } from "@/components/ui/input";
 
 import {
     Field,
-    FieldGroup,
     FieldLabel,
-    FieldDescription,
 } from "@/components/ui/field";
 
 import {
@@ -57,102 +54,140 @@ export function VariabelFormModal({
         },
     });
 
-    /* ================= SYNC EDIT DATA (Memastikan form terisi untuk Edit) ================= */
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
-        // Ini memastikan defaultValues disetel saat mode Edit
-        reset(
-            defaultValues ?? {
+        if (open) {
+            reset(defaultValues ?? {
                 kode: "",
                 nama: "",
                 deskripsi: "",
-            }
-        );
-    }, [defaultValues, reset]);
-
-    /* ✅ PERBAIKAN: RESET FORM SAAT MODAL DITUTUP */
-    useEffect(() => {
-        // Ketika 'open' menjadi false (modal ditutup), panggil reset()
-        if (!open) {
-            reset(); 
+            });
+        } else {
+            reset();
         }
-    }, [open, reset]);
+    }, [open, defaultValues, reset]);
+
+    // ✅ LOGIKA KHUSUS MOBILE: Mencegah input tertutup keyboard
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        const target = e.target;
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+        if (isMobile && scrollAreaRef.current) {
+            // Beri ruang di bawah agar input bisa di-scroll ke atas keyboard
+            scrollAreaRef.current.style.paddingBottom = "250px";
+            
+            setTimeout(() => {
+                target.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+        }
+    };
+
+    const handleBlur = () => {
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+        
+        // Kembalikan padding hanya jika di mode mobile
+        if (isMobile && scrollAreaRef.current) {
+            scrollAreaRef.current.style.paddingBottom = "0px";
+        }
+    };
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={(isOpen) => {
-                if (!isOpen) onClose();
-            }}
-        >
-            <DialogContent className="max-w-md">
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <FieldGroup>
-                        <DialogHeader>
-                            <DialogTitle>
-                                {defaultValues ? "Edit Variabel" : "Tambah Variabel"}
-                            </DialogTitle>
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+            <DialogContent className="w-[95vw] sm:max-w-md p-0 flex flex-col overflow-hidden max-h-[90vh] top-[45%] sm:top-[50%] transition-all">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col min-h-0">
+                    
+                    <DialogHeader className="p-4 sm:p-6 border-b bg-white shrink-0 relative z-50">
+                        <DialogTitle className="text-base sm:text-lg">
+                            {defaultValues ? "Edit Variabel" : "Tambah Variabel"}
+                        </DialogTitle>
+                        <DialogDescription className="text-xs">
+                            {defaultValues
+                                ? "Perbarui informasi variabel kuesioner."
+                                : "Lengkapi data variabel untuk kuesioner baru."}
+                        </DialogDescription>
+                    </DialogHeader>
 
-                            <DialogDescription>
-                                {defaultValues
-                                    ? "Perbarui informasi variabel."
-                                    : "Lengkapi data variabel kuesioner."}
-                            </DialogDescription>
-                        </DialogHeader>
+                    {/* Area Konten Scrollable */}
+                    <div 
+                        ref={scrollAreaRef}
+                        className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 transition-all duration-300"
+                    >
+                        <div className="grid grid-cols-1 gap-4">
+                            <Field>
+                                <FieldLabel className="text-xs font-bold uppercase text-gray-500 tracking-wider">
+                                    Kode Variabel
+                                </FieldLabel>
+                                <Input
+                                    id="kode"
+                                    placeholder="Contoh: V1"
+                                    className="h-10 mt-1"
+                                    {...register("kode")}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                    autoComplete="off"
+                                />
+                                {errors.kode && (
+                                    <p className="text-red-500 text-[10px] mt-1 font-medium">{errors.kode.message}</p>
+                                )}
+                            </Field>
 
-                        {/* ================= KODE ================= */}
-                        <Field>
-                            <FieldLabel htmlFor="kode">Kode Variabel</FieldLabel>
-                            <Input
-                                id="kode"
-                                placeholder="Contoh: V1"
-                                {...register("kode")}
-                            />
-                            <FieldDescription>
-                                {errors.kode?.message}
-                            </FieldDescription>
-                        </Field>
+                            <Field>
+                                <FieldLabel className="text-xs font-bold uppercase text-gray-500 tracking-wider">
+                                    Nama Variabel
+                                </FieldLabel>
+                                <Input
+                                    id="nama"
+                                    placeholder="Contoh: Kualitas Pelayanan"
+                                    className="h-10 mt-1"
+                                    {...register("nama")}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                    autoComplete="off"
+                                />
+                                {errors.nama && (
+                                    <p className="text-red-500 text-[10px] mt-1 font-medium">{errors.nama.message}</p>
+                                )}
+                            </Field>
 
-                        {/* ================= NAMA ================= */}
-                        <Field>
-                            <FieldLabel htmlFor="nama">Nama Variabel</FieldLabel>
-                            <Input
-                                id="nama"
-                                placeholder="Contoh: Kualitas Pelayanan"
-                                {...register("nama")}
-                            />
-                            <FieldDescription>
-                                {errors.nama?.message}
-                            </FieldDescription>
-                        </Field>
+                            <Field>
+                                <FieldLabel className="text-xs font-bold uppercase text-gray-500 tracking-wider">
+                                    Deskripsi
+                                </FieldLabel>
+                                <Input
+                                    id="deskripsi"
+                                    placeholder="Deskripsi singkat variabel"
+                                    className="h-10 mt-1"
+                                    {...register("deskripsi")}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                    autoComplete="off"
+                                />
+                                {errors.deskripsi && (
+                                    <p className="text-red-500 text-[10px] mt-1 font-medium">{errors.deskripsi.message}</p>
+                                )}
+                            </Field>
+                        </div>
+                    </div>
 
-                        {/* ================= DESKRIPSI ================= */}
-                        <Field>
-                            <FieldLabel htmlFor="deskripsi">Deskripsi</FieldLabel>
-                            <Input
-                                id="deskripsi"
-                                placeholder="Deskripsi singkat variabel"
-                                {...register("deskripsi")}
-                            />
-                            <FieldDescription>
-                                {errors.deskripsi?.message}
-                            </FieldDescription>
-                        </Field>
+                    <DialogFooter className="p-4 border-t bg-gray-50 flex flex-row gap-2 shrink-0 z-50">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={onClose}
+                            className="flex-1 h-10 text-sm"
+                        >
+                            Batal
+                        </Button>
 
-                        {/* ================= ACTION ================= */}
-                        <DialogFooter className="pt-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={onClose}
-                            >
-                                Batal
-                            </Button>
-
-                            <Button type="submit" disabled={isSubmitting}>
-                                {defaultValues ? "Simpan Perubahan" : "Tambah Variabel"}
-                            </Button>
-                        </DialogFooter>
-                    </FieldGroup>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex-1 h-10 text-sm"
+                        >
+                            {isSubmitting ? "..." : (defaultValues ? "Simpan" : "Tambah")}
+                        </Button>
+                    </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>

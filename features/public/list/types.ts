@@ -1,35 +1,75 @@
-/**
- * Objek tunggal Kuesioner Publik
- */
+/* =========================
+   KATEGORI
+========================= */
+export type PublicKategori = {
+    kategoriId: number;
+    nama: string;
+};
+
+/* =========================
+   DISTRIBUSI (PUBLIC)
+   (sesuai response: hanya kodeAkses)
+========================= */
+export type PublicDistribusi = {
+    kodeAkses: string;
+};
+
+/* =========================
+   KUESIONER (PUBLIC)
+========================= */
 export type PublicKuesioner = {
-    distribusiId: number;       // ID distribusi
-    kuesionerIde: number;       // ID kuesioner dari database
-    kuesionerId: number;        // ID utama kuesioner
-    kodeAkses: string;          // Kode akses unik
-    urlLink: string;            // Link pengisian
-    judul: string;              // Judul kuesioner
-    tujuan: string;             // Deskripsi tujuan kuesioner
-    kategori: string | null;    // Nama kategori
-    tanggalMulai: string;       // Tanggal mulai (ISO string)
-    tanggalSelesai: string;     // Tanggal selesai (ISO string)
+    kuesionerId: number;
+    judul: string;
+    tujuan: string ;
+    manfaat: string | null;
+    distribusiId: number;
+    estimasiMenit: number | null;
+    targetResponden: number | null;
+    kategori: PublicKategori;
+    distribusi: PublicDistribusi[];
+    tanggalMulai: string;
+    tanggalSelesai: string;
+    createdAt: string;
+    updatedAt: string;
 };
 
-/**
- * Response untuk List (Banyak Data)
- */
+/* =========================
+   PERTANYAAN (DETAIL)
+========================= */
+export type PublicPertanyaan = {
+    pertanyaanId: number;
+    indikatorId: number;
+    teksPertanyaan: string;
+    urutan: number;
+    labelSkala: Record<string, string>;
+    createdAt: string;
+    updatedAt: string;
+};
+
+/* =========================
+   DATA DETAIL (WRAPPER)
+========================= */
+export type PublicDetailData = {
+    kuesioner: PublicKuesioner;
+    pertanyaan: PublicPertanyaan[];
+};
+
+/* =========================
+   RESPONSE LIST
+========================= */
 export type PublicListResponse = {
-    success: boolean;           // Status sukses
-    message: string;            // Pesan response
-    data: PublicKuesioner[];    // Array data kuesioner
-    meta: null;           // Metadata paginasi
+    success: boolean;
+    message: string;
+    data: PublicKuesioner[];
+    meta: null;
 };
 
-/**
- * Response untuk Detail (Satu Data)
- * Sesuai dengan Promise<{ success: boolean; data: PublicKuesioner }> di services.ts
- */
+/* =========================
+   RESPONSE DETAIL (FINAL)
+========================= */
 export type PublicDetailResponse = {
-    success: boolean;           // Status sukses
-    message: string;            // Pesan response
-    data: PublicKuesioner;      // Data tunggal kuesioner
+    success: boolean;
+    message: string;
+    data: PublicDetailData;
+    meta: null;
 };

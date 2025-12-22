@@ -1,10 +1,8 @@
-// fileName: pertanyaan-form-modal.tsx
 "use client";
 
-import { useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useEffect, useRef } from "react";
+import { useForm, useFieldArray, useWatch, Path, PathValue } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// Pastikan Anda mengimpor komponen UI Anda di sini
 import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -12,14 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 
-// Impor dari file lokal
 import { PertanyaanFormValues, PertanyaanFormSchema } from "../schemas";
-
-// ======================================================
-// DEFINISI TEMPLATE DATA LIKERT
-// ======================================================
 
 type ScaleItem = { value: number; label: string };
 
@@ -40,25 +33,15 @@ const LIKERT_6_TT_SCALES: ScaleItem[] = [
     { value: 6, label: "Sangat Setuju (SS)" },
 ];
 
-
-// ======================================================
-// TYPES & PROPS
-// ======================================================
-
 type FormProps = {
     open: boolean;
-    defaultValues?: PertanyaanFormValues;
+    defaultValues?: Partial<PertanyaanFormValues>;
     isSubmitting?: boolean;
     onClose: () => void;
     onSubmit: (values: PertanyaanFormValues) => void;
-
     indikatorList: { indikatorId: number; label: string }[];
     isEditMode: boolean;
 };
-
-// ======================================================
-// KOMPONEN FORM MODAL
-// ======================================================
 
 export function PertanyaanFormModal({
     open,
@@ -70,253 +53,191 @@ export function PertanyaanFormModal({
     isEditMode,
 }: FormProps) {
     const {
-        register,
-        handleSubmit,
-        reset,
-        control,
-        setValue,
-        watch,
+        control, register, handleSubmit, reset, setValue,
         formState: { errors },
-    }
-        = useForm<PertanyaanFormValues>({
-            resolver: zodResolver(PertanyaanFormSchema),
-            defaultValues: {
-                teksPertanyaan: "",
-                urutan: 0,
-                templateType: undefined,
-                customScales: undefined,
-                indikatorId: undefined,
-            },
-        });
-
-    const watchedTemplateType = watch('templateType');
-    const watchedIndikatorId = watch('indikatorId');
-
-    /* ================= C. LOGIC: FIELD ARRAY KUSTOM ================= */
-
-    const { fields, append, remove } = useFieldArray<PertanyaanFormValues>({
-        control,
-        name: "customScales" as const,
+    } = useForm<PertanyaanFormValues>({
+        resolver: zodResolver(PertanyaanFormSchema),
+        defaultValues: {
+            teksPertanyaan: "",
+            urutan: 0,
+            indikatorId: 0,
+            templateType: "likert_5",
+            customScales: LIKERT_5_SCALES,
+        },
     });
 
-    const currentScalesCount = fields.length;
+    const watchedTemplateType = useWatch({ control, name: "templateType" });
+    const watchedIndikatorId = useWatch({ control, name: "indikatorId" });
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-    /* ================= A. LOGIC: SYNC DATA & RESET ================= */
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "customScales",
+    });
 
     useEffect(() => {
         if (open) {
             reset(defaultValues ?? {
                 teksPertanyaan: "",
                 urutan: 0,
-                templateType: undefined,
-                customScales: undefined,
-                indikatorId: undefined,
+                indikatorId: 0,
+                templateType: "likert_5",
+                customScales: LIKERT_5_SCALES,
             });
         } else {
             reset();
         }
     }, [open, defaultValues, reset]);
 
-    /* ================= B. LOGIC: AUTO-POPULATE TEMPLATE ================= */
-
     useEffect(() => {
-        let scalesToSet: ScaleItem[] | undefined;
-
         if (watchedTemplateType === 'likert_5') {
-            scalesToSet = LIKERT_5_SCALES;
+            setValue('customScales', LIKERT_5_SCALES, { shouldValidate: true });
         } else if (watchedTemplateType === 'likert_6_tt') {
-            scalesToSet = LIKERT_6_TT_SCALES;
+            setValue('customScales', LIKERT_6_TT_SCALES, { shouldValidate: true });
+        }
+    }, [watchedTemplateType, setValue]);
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLButtonElement>) => {
+        const target = e.target;
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+        if (target instanceof HTMLInputElement && target.type === "number" && target.value === "0") {
+            const name = target.name as Path<PertanyaanFormValues>;
+            setValue(name, "");
         }
 
-        if (scalesToSet) {
-            setValue('customScales', scalesToSet, { shouldValidate: true });
-        } else if (watchedTemplateType === 'custom' && !fields.length) {
-            setValue('customScales', [{ value: 1, label: '' }, { value: 2, label: '' }], { shouldValidate: false });
+        if (isMobile && scrollAreaRef.current) {
+            scrollAreaRef.current.style.paddingBottom = "280px";
+            setTimeout(() => {
+                target.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
         }
+    };
 
-    }, [watchedTemplateType, isEditMode, setValue, fields.length]);
-
-    /* ================= D. RENDER ================= */
+    const handleBlur = () => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.style.paddingBottom = "20px";
+        }
+    };
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={(isOpen) => {
-                if (!isOpen) onClose();
-            }}
-        >
-            {/* ✅ Perbaikan 1: Gunakan max-h-[90vh] dan overflow-hidden di DialogContent */}
-            <DialogContent className="max-w-xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+            <DialogContent className="w-[95vw] sm:max-w-xl max-h-[90vh] p-0 flex flex-col overflow-hidden top-[45%] sm:top-[50%] transition-all">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
 
-                {/* HEADER (Penting: harus ada padding agar header tidak menempel di tepi) */}
-                <DialogHeader className="p-6 pb-0">
-                    <DialogTitle>
-                        {isEditMode ? "Edit Pertanyaan" : "Tambah Pertanyaan"}
-                    </DialogTitle>
-                    <DialogDescription>
-                        Lengkapi data pertanyaan dan definisikan skala responnya.
-                    </DialogDescription>
-                </DialogHeader>
+                    <DialogHeader className="p-4 sm:p-5 border-b bg-white shrink-0 relative z-50">
+                        <DialogTitle className="text-base sm:text-lg">
+                            {isEditMode ? "Edit Pertanyaan" : "Tambah Pertanyaan"}
+                        </DialogTitle>
+                        <DialogDescription className="text-xs text-muted-foreground mt-1">
+                            Lengkapi data pertanyaan dan tentukan skala respon.
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
-                    {/* ✅ Perbaikan 2: Konten Utama Dibuat Scrollable dan mengambil sisa ruang (flex-1) */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-4">
-
-                        {/* ================= 1. INDIKATOR INDUK ================= */}
+                    <div ref={scrollAreaRef} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 transition-all duration-300">
                         <Field>
-                            <FieldLabel htmlFor="indikatorId">Indikator Induk</FieldLabel>
+                            <FieldLabel className="text-xs font-bold uppercase text-gray-500">Indikator Induk</FieldLabel>
                             <Select
-                                onValueChange={(value) => {
-                                    setValue("indikatorId", Number(value), { shouldValidate: true });
-                                }}
-                                value={watchedIndikatorId ? String(watchedIndikatorId) : "0"}
+                                value={watchedIndikatorId ? String(watchedIndikatorId) : ""}
+                                onValueChange={(v) => setValue("indikatorId", Number(v), { shouldValidate: true })}
                                 disabled={isEditMode || isSubmitting}
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="h-9 mt-1" onFocus={handleFocus}>
                                     <SelectValue placeholder="Pilih Indikator" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="0" disabled>Pilih Indikator</SelectItem>
                                     {indikatorList.map((i) => (
-                                        <SelectItem key={i.indikatorId} value={String(i.indikatorId)}>
-                                            {i.label}
-                                        </SelectItem>
+                                        <SelectItem key={i.indikatorId} value={String(i.indikatorId)}>{i.label}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <FieldDescription className="text-red-500">
-                                {errors.indikatorId?.message}
-                            </FieldDescription>
+                            {errors.indikatorId && <p className="text-red-500 text-[10px] mt-1">{errors.indikatorId.message}</p>}
                         </Field>
 
-                        {/* ================= 2. TEKS & URUTAN ================= */}
                         <div className="grid grid-cols-4 gap-4">
                             <Field className="col-span-3">
-                                <FieldLabel htmlFor="teksPertanyaan">Teks Pertanyaan</FieldLabel>
+                                <FieldLabel className="text-xs font-bold uppercase text-gray-500">Teks Pertanyaan</FieldLabel>
                                 <Textarea
-                                    id="teksPertanyaan"
-                                    placeholder="Contoh: Pegawai cepat tanggap dalam melayani kebutuhan pelanggan."
                                     {...register("teksPertanyaan")}
-                                    disabled={isSubmitting}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                    placeholder="Teks pertanyaan..."
+                                    className="text-sm mt-1 resize-none h-20"
                                 />
-                                <FieldDescription className="text-red-500">
-                                    {errors.teksPertanyaan?.message}
-                                </FieldDescription>
+                                {errors.teksPertanyaan && <p className="text-red-500 text-[10px] mt-1">{errors.teksPertanyaan.message}</p>}
                             </Field>
-
                             <Field className="col-span-1">
-                                <FieldLabel htmlFor="urutan">Urutan</FieldLabel>
+                                <FieldLabel className="text-xs font-bold uppercase text-gray-500">Urutan</FieldLabel>
                                 <Input
-                                    id="urutan"
                                     type="number"
-                                    placeholder="1"
                                     {...register("urutan", { valueAsNumber: true })}
-                                    disabled={isSubmitting}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
+                                    className="h-9 mt-1"
                                 />
-                                <FieldDescription className="text-red-500">
-                                    {errors.urutan?.message}
-                                </FieldDescription>
+                                {errors.urutan && <p className="text-red-500 text-[10px] mt-1">{errors.urutan.message}</p>}
                             </Field>
                         </div>
 
-
-                        {/* ================= 3. PILIHAN TEMPLATE SKALA ================= */}
                         <Field>
-                            <FieldLabel>Pilih Skala Respon</FieldLabel>
+                            <FieldLabel className="text-xs font-bold uppercase text-gray-500">Pilih Skala Respon</FieldLabel>
                             <Select
-                                onValueChange={(value) => {
-                                    setValue('templateType', value as PertanyaanFormValues['templateType'], { shouldValidate: true });
-                                }}
                                 value={watchedTemplateType || ""}
-                                disabled={isSubmitting}
+                                onValueChange={(v) =>
+                                    setValue(
+                                        'templateType',
+                                        v as PathValue<PertanyaanFormValues, 'templateType'>,
+                                        { shouldValidate: true }
+                                    )
+                                }
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="h-9 mt-1" onFocus={handleFocus}>
                                     <SelectValue placeholder="Pilih Template Skala" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="likert_5">Likert 5 Poin (Sangat T.S. - Sangat S.)</SelectItem>
-                                    <SelectItem value="likert_6_tt">Likert 6 Poin (Termasuk 'Tidak Tahu')</SelectItem>
-                                    <SelectItem value="custom">Skala Kustom (Masukkan sendiri)</SelectItem>
+                                    <SelectItem value="likert_5">Likert 5 Poin</SelectItem>
+                                    <SelectItem value="likert_6_tt">Likert 6 Poin (AdaTidak Tahu)</SelectItem>
+                                    <SelectItem value="custom">Skala Kustom</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <FieldDescription className="text-red-500">
-                                {errors.templateType?.message}
-                            </FieldDescription>
                         </Field>
 
-                        {/* ================= 4. CUSTOM SCALE INPUT (Hanya tampil jika 'custom') ================= */}
                         {watchedTemplateType === 'custom' && (
                             <FieldGroup className="pt-2 border-t mt-4">
-                                <FieldLabel>Definisi Skala Kustom ({currentScalesCount} Poin)</FieldLabel>
-
-                                {/* Header Grid */}
-                                <div className="grid grid-cols-8 gap-2 font-semibold text-sm text-gray-600 dark:text-gray-300 mb-2">
-                                    <span className="col-span-1">Nilai</span>
-                                    <span className="col-span-6">Label Respon</span>
-                                    <span className="col-span-1 text-right">Hapus</span>
-                                </div>
-
-                                {/* Field Array Mapping */}
+                                <FieldLabel className="text-[10px] font-bold uppercase text-blue-600">Definisi Skala Kustom</FieldLabel>
                                 {fields.map((field, index) => (
-                                    <div key={field.id} className="grid grid-cols-8 gap-2 items-center mb-2">
+                                    <div key={field.id} className="flex items-center gap-2 mb-2">
+                                        <Input value={index + 1} readOnly className="w-10 h-8 text-center text-xs bg-gray-50 shrink-0" />
                                         <Input
-                                            value={index + 1}
-                                            readOnly
-                                            disabled
-                                            className="col-span-1 text-center"
-                                            {...register(`customScales.${index}.value`, { valueAsNumber: true })}
-                                        />
-
-                                        <Input
-                                            className="col-span-6"
-                                            placeholder={`Label untuk nilai ${index + 1}`}
                                             {...register(`customScales.${index}.label`)}
-                                            disabled={isSubmitting}
+                                            placeholder={`Label nilai ${index + 1}`}
+                                            className="h-8 text-sm flex-1"
+                                            onFocus={handleFocus}
+                                            onBlur={handleBlur}
                                         />
-
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             onClick={() => remove(index)}
-                                            disabled={fields.length <= 2 || isSubmitting}
-                                            className="col-span-1 justify-end"
-                                        >
-                                            X
-                                        </Button>
-
-                                        {errors.customScales?.[index]?.label && (
-                                            <p className="col-span-8 text-xs text-red-500 mt-1">
-                                                {errors.customScales[index]?.label?.message}
-                                            </p>
-                                        )}
+                                            disabled={fields.length <= 2}
+                                            className="h-8 w-8 p-0 text-red-500 shrink-0"
+                                        >✕</Button>
                                     </div>
                                 ))}
-
                                 <Button
                                     type="button"
-                                    variant="secondary"
-                                    onClick={() => append({ value: fields.length + 1, label: '' })}
-                                    disabled={fields.length >= 10 || isSubmitting}
-                                    className="mt-2"
-                                >
-                                    + Tambah Poin Skala ({fields.length}/10)
-                                </Button>
-                                <FieldDescription className="text-red-500">
-                                    {errors.customScales?.message}
-                                </FieldDescription>
+                                    variant="outline"
+                                    onClick={() => append({ value: fields.length + 1, label: "" })}
+                                    className="w-full h-8 text-xs border-dashed"
+                                >+ Tambah Poin Skala</Button>
                             </FieldGroup>
                         )}
                     </div>
 
-
-                    {/* FOOTER (Penting: Pindahkan DialogFooter ke dalam form, di luar area scroll) */}
-                    <DialogFooter className="p-6 pt-0 mt-6">
-                        <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-                            Batal
-                        </Button>
-
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isEditMode ? "Simpan Perubahan" : "Tambah Pertanyaan"}
+                    <DialogFooter className="p-4 border-t bg-gray-50 flex flex-row gap-2 shrink-0 z-50">
+                        <Button variant="outline" type="button" onClick={onClose} className="flex-1 h-9 text-sm">Batal</Button>
+                        <Button type="submit" disabled={isSubmitting} className="flex-1 h-9 text-sm">
+                            {isSubmitting ? "..." : (isEditMode ? "Simpan" : "Tambah")}
                         </Button>
                     </DialogFooter>
                 </form>

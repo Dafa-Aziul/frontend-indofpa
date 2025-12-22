@@ -6,26 +6,27 @@ import {
     useKuesionerDetail,
     useVariabel,
     useIndikator,
-    usePertanyaan, // ✅ Import hook Pertanyaan
+    usePertanyaan,
 } from "@/features/kuesioner/detail/hooks";
 
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/common/page-header";
 import AppBreadcrumb from "@/components/common/app-breadcrumb";
 
+// Components
 import { KuesionerDetailContent } from "@/features/kuesioner/detail/components/kuesioner-detail-content";
 import { KuesionerVariabelSection } from "@/features/kuesioner/detail/components/kuesioner-variabel-section";
 import { KuesionerIndikatorSection } from "@/features/kuesioner/detail/components/kuesioner-indikator-section";
 import { KuesionerPertanyaanSection } from "@/features/kuesioner/detail/components/kuesioner-pertanyaan-section";
 
+// Modals & Dialogs
 import { VariabelFormModal } from "@/features/kuesioner/detail/components/variabale-form-modal";
 import { VariabelDeleteDialog } from "@/features/kuesioner/detail/components/variabel-delete-dialog";
 import { IndikatorFormModal } from "@/features/kuesioner/detail/components/indikator-form-modal";
 import { IndikatorDeleteDialog } from "@/features/kuesioner/detail/components/indikator-delete-dialog";
-// ✅ Import komponen Pertanyaan baru
 import { PertanyaanFormModal } from "@/features/kuesioner/detail/components/pertanyaan-form-modal";
 import { PertanyaanDeleteDialog } from "@/features/kuesioner/detail/components/pertanyaan-delete-dialog";
-
 
 export default function KuesionerDetailPage() {
     const { id } = useParams();
@@ -36,19 +37,11 @@ export default function KuesionerDetailPage() {
         data,
         loading,
         error,
-        // Helper Variabel & Indikator (sudah ada)
         addVariabel, updateVariabelLocal, deleteVariabelLocal,
         addIndikator, updateIndikatorLocal, deleteIndikatorLocal,
-
-        // ✅ Helper Pertanyaan (BARU)
-        addPertanyaan,
-        updatePertanyaanLocal,
-        deletePertanyaanLocal,
-
-        // ✅ Data Turunan (BARU)
+        addPertanyaan, updatePertanyaanLocal, deletePertanyaanLocal,
         indikatorList,
     } = useKuesionerDetail(kuesionerId);
-
 
     /* ================= VARIABEL CRUD HOOK ================= */
     const variabel = useVariabel({
@@ -57,11 +50,7 @@ export default function KuesionerDetailPage() {
         updateVariabelLocal,
         deleteVariabelLocal,
     });
-    const variabelToDelete = data?.variabel.find(
-        (v) => v.variabelId === variabel.deleteId
-    );
-    const deleteName = variabelToDelete?.nama ?? "";
-
+    const deleteName = data?.variabel.find((v) => v.variabelId === variabel.deleteId)?.nama ?? "";
 
     /* ================= INDIKATOR CRUD HOOK ================= */
     const indikator = useIndikator({
@@ -69,10 +58,7 @@ export default function KuesionerDetailPage() {
         updateIndikatorLocal,
         deleteIndikatorLocal,
     });
-    const indikatorToDelete = data?.indikator.find(
-        (i) => i.indikatorId === indikator.deleteId
-    );
-    const deleteIndikatorName = indikatorToDelete?.nama ?? "";
+    const deleteIndikatorName = data?.indikator.find((i) => i.indikatorId === indikator.deleteId)?.nama ?? "";
 
     const indikatorDefaultValues = indikator.editData
         ? {
@@ -82,160 +68,157 @@ export default function KuesionerDetailPage() {
         }
         : undefined;
 
-
-    /* ================= PERTANYAAN CRUD HOOK (BARU) ================= */
+    /* ================= PERTANYAAN CRUD HOOK ================= */
     const pertanyaan = usePertanyaan({
         addPertanyaan,
         updatePertanyaanLocal,
         deletePertanyaanLocal,
     });
 
-    const pertanyaanToDelete = data?.pertanyaan.find(
-        (p) => p.pertanyaanId === pertanyaan.deleteId
-    );
-    const deletePertanyaanText = pertanyaanToDelete?.teksPertanyaan ?? "";
-
-    // ✅ Siapkan default values untuk Pertanyaan Modal (Edit)
     const pertanyaanDefaultValues = pertanyaan.editData
         ? {
             teksPertanyaan: pertanyaan.editData.teksPertanyaan,
             urutan: pertanyaan.editData.urutan,
             indikatorId: pertanyaan.editData.indikatorId,
-
-            // Transformasi labelSkala (Object API) menjadi customScales (Array Form)
-            templateType: 'custom', // Selalu anggap kustom saat edit dari API
+            templateType: 'custom' as const,
             customScales: Object.entries(pertanyaan.editData.labelSkala)
                 .map(([value, label]) => ({
                     value: Number(value),
                     label: label,
                 }))
-                .sort((a, b) => a.value - b.value), // Pastikan urut 1, 2, 3...
+                .sort((a, b) => a.value - b.value),
         }
         : undefined;
 
-
     /* ================= STATE RENDER ================= */
-    if (loading) return <p>Loading...</p>;
-    if (error || !data) return <p>Gagal memuat data</p>;
+    if (loading) return <div className="p-20 text-center text-gray-500">Memuat detail kuesioner...</div>;
+    if (error || !data) return <div className="p-20 text-center text-red-500">Gagal memuat data kuesioner</div>;
 
     return (
-        <>
-            <PageHeader title="Detail Kuesioner" />
+        <div className="flex flex-col gap-6 pb-12">
+            {/* Header & Breadcrumb Container */}
+            <div className="space-y-1">
+                <PageHeader title="Detail Kuesioner" />
+                <AppBreadcrumb
+                    items={[
+                        { label: "Kuesioner", href: "/admin/kuesioner" },
+                        { label: `Detail: ${data.kuesioner.judul}` },
+                    ]}
+                />
+            </div>
 
-            <AppBreadcrumb
-                className="pb-3"
-                items={[
-                    { label: "Kuesioner", href: "/admin/kuesioner" },
-                    { label: `Detail: ${data.kuesioner.judul}` },
-                ]}
-            />
-
-            <Card>
-                <CardHeader className="border-b">
-                    <h1 className="text-lg font-semibold">
-                        {data.kuesioner.judul}
-                    </h1>
+            <Card className="overflow-hidden border-none shadow-md">
+                <CardHeader className="bg-slate-50/50 py-6 px-8 border-b">
+                    <div className="space-y-1">
+                        <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Management Console</p>
+                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                            {data.kuesioner.judul}
+                        </h1>
+                    </div>
                 </CardHeader>
 
-                <CardContent className="space-y-10">
-                    {/* ================= INFORMASI ================= */}
-                    <KuesionerDetailContent kuesioner={data.kuesioner} />
+                <CardContent className="p-8 space-y-12">
+                    {/* 1. INFORMASI DASAR */}
+                    <section className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <KuesionerDetailContent kuesioner={data.kuesioner} />
+                    </section>
 
-                    {/* ================= VARIABEL SECTION ================= */}
-                    <KuesionerVariabelSection
-                        data={data.variabel}
-                        onAdd={variabel.openCreate}
-                        onEdit={variabel.openEdit}
-                        onDelete={variabel.openDelete}
-                    />
+                    <Separator />
 
-                    {/* Variabel Form Modal (CREATE/EDIT) */}
-                    <VariabelFormModal
-                        open={variabel.openForm}
-                        defaultValues={
-                            variabel.editData
-                                ? {
-                                    kode: variabel.editData.kode,
-                                    nama: variabel.editData.nama,
-                                    deskripsi: variabel.editData.deskripsi,
-                                }
-                                : undefined
-                        }
-                        isSubmitting={variabel.isSubmitting}
-                        onClose={variabel.closeForm}
-                        onSubmit={variabel.submitForm}
-                    />
-                    {/* Variabel Delete Dialog */}
-                    <VariabelDeleteDialog
-                        open={!!variabel.deleteId}
-                        nama={deleteName}
-                        onCancel={variabel.closeDelete}
-                        onConfirm={variabel.confirmDelete}
-                    />
+                    {/* 2. VARIABEL SECTION */}
+                    <section className="animate-in fade-in slide-in-from-bottom-2 duration-700">
+                        <KuesionerVariabelSection
+                            data={data.variabel}
+                            onAdd={variabel.openCreate}
+                            onEdit={variabel.openEdit}
+                            onDelete={variabel.openDelete}
+                        />
+                    </section>
 
-                    {/* ================= INDIKATOR SECTION ================= */}
-                    <KuesionerIndikatorSection
-                        indikator={data.indikator}
-                        variabel={data.variabel}
-                        onAdd={indikator.openCreate}
-                        onEdit={indikator.openEdit}
-                        onDelete={indikator.openDelete}
-                    />
+                    <Separator />
 
-                    {/* Indikator Form Modal (CREATE/EDIT) */}
-                    <IndikatorFormModal
-                        open={indikator.openForm}
-                        defaultValues={indikatorDefaultValues}
-                        isSubmitting={indikator.isSubmitting}
-                        onClose={indikator.closeForm}
-                        onSubmit={indikator.submitForm}
-                        variabelList={data.variabel}
-                        isEditMode={!!indikator.editData}
-                    />
-                    {/* Indikator Delete Dialog */}
-                    <IndikatorDeleteDialog
-                        open={!!indikator.deleteId}
-                        nama={deleteIndikatorName}
-                        onCancel={indikator.closeDelete}
-                        onConfirm={indikator.confirmDelete}
-                    />
+                    {/* 3. INDIKATOR SECTION */}
+                    <section className="animate-in fade-in slide-in-from-bottom-2 duration-700">
+                        <KuesionerIndikatorSection
+                            indikator={data.indikator}
+                            variabel={data.variabel}
+                            onAdd={() => indikator.openCreate(data.variabel[0]?.variabelId ?? 0)}
+                            onEdit={indikator.openEdit}
+                            onDelete={indikator.openDelete}
+                        />
+                    </section>
 
+                    <Separator />
 
-                    {/* ================= PERTANYAAN SECTION ================= */}
-                    <KuesionerPertanyaanSection
-                        pertanyaan={data.pertanyaan}
-                        indikator={data.indikator}
-                        variabel={data.variabel}
-                        // ✅ Kirim fungsi CRUD yang sebenarnya
-                        onAdd={pertanyaan.openCreate}
-                        onEdit={pertanyaan.openEdit}
-                        onDelete={pertanyaan.openDelete}
-                    />
+                    {/* 4. PERTANYAAN SECTION */}
+                    <section className="animate-in fade-in slide-in-from-bottom-2 duration-1000">
+                        <KuesionerPertanyaanSection
+                            pertanyaan={data.pertanyaan}
+                            indikator={data.indikator}
+                            variabel={data.variabel}
+                            onAdd={() => pertanyaan.openCreate(data.indikator[0]?.indikatorId ?? 0)}
+                            onEdit={pertanyaan.openEdit}
+                            onDelete={pertanyaan.openDelete}
+                        />
+                    </section>
                 </CardContent>
             </Card>
 
-            {/* ================= PERTANYAAN MODALS (BARU) ================= */}
+            {/* ================= MODALS & DIALOGS ================= */}
+            
+            {/* Variabel Modals */}
+            <VariabelFormModal
+                open={variabel.openForm}
+                defaultValues={variabel.editData ? {
+                    kode: variabel.editData.kode,
+                    nama: variabel.editData.nama,
+                    deskripsi: variabel.editData.deskripsi,
+                } : undefined}
+                isSubmitting={variabel.isSubmitting}
+                onClose={variabel.closeForm}
+                onSubmit={variabel.submitForm}
+            />
+            <VariabelDeleteDialog
+                open={!!variabel.deleteId}
+                nama={deleteName}
+                onCancel={variabel.closeDelete}
+                onConfirm={variabel.confirmDelete}
+            />
 
-            {/* Pertanyaan Form Modal (CREATE/EDIT) */}
+            {/* Indikator Modals */}
+            <IndikatorFormModal
+                open={indikator.openForm}
+                defaultValues={indikatorDefaultValues}
+                isSubmitting={indikator.isSubmitting}
+                onClose={indikator.closeForm}
+                onSubmit={indikator.submitForm}
+                variabelList={data.variabel}
+                isEditMode={!!indikator.editData}
+            />
+            <IndikatorDeleteDialog
+                open={!!indikator.deleteId}
+                nama={deleteIndikatorName}
+                onCancel={indikator.closeDelete}
+                onConfirm={indikator.confirmDelete}
+            />
+
+            {/* Pertanyaan Modals */}
             <PertanyaanFormModal
                 open={pertanyaan.openForm}
                 defaultValues={pertanyaanDefaultValues}
                 isSubmitting={pertanyaan.isSubmitting}
                 onClose={pertanyaan.closeForm}
                 onSubmit={pertanyaan.submitForm}
-                indikatorList={indikatorList} // Kirim list indikator untuk Select
+                indikatorList={indikatorList}
                 isEditMode={!!pertanyaan.editData}
             />
-
-            {/* Pertanyaan Delete Dialog */}
             <PertanyaanDeleteDialog
                 open={!!pertanyaan.deleteId}
                 pertanyaanId={pertanyaan.deleteId}
                 isDeleting={pertanyaan.isSubmitting}
-                // Tampilkan 30 karakter pertama teks pertanyaan sebagai konfirmasi
                 onClose={pertanyaan.closeDelete}
                 onConfirm={pertanyaan.confirmDelete}
             />
-        </>
+        </div>
     );
 }

@@ -20,9 +20,7 @@ import HeaderCards from "@/features/monitoring/detail/components/header-cards";
 export default function DetailMonitoringPage() {
     const params = useParams();
     const router = useRouter();
-    // Mendapatkan ID
-    console.log("Raw Params:", params);
-    console.log("Raw Kuesioner ID:", params.kuesionerId);
+    // Mendapatkan 
     const kuesionerId = Number(params.id);
 
     // **********************************************

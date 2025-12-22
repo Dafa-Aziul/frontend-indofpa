@@ -22,12 +22,18 @@ export const indikatorSchema = z.object({
     .string()
     .min(1, "Kode indikator wajib diisi")
     .max(10, "Kode maksimal 10 karakter"),
-
   nama: z.string().min(1, "Nama indikator wajib diisi"),
 });
 
-export type IndikatorFormValues = z.infer<typeof indikatorSchema>;
+export const IndikatorFormExtendedSchema = indikatorSchema.extend({
+  // variabelId harus dikoersi agar input string dari Select menjadi number
+  variabelId: z.number().min(1, "Variabel wajib dipilih"),
+});
 
+export type IndikatorFormValues = z.infer<typeof indikatorSchema>;
+export type IndikatorFormExtendedValues = z.infer<
+  typeof IndikatorFormExtendedSchema
+>;
 /* ======================================================
    PERTANYAAN & SKALA (BARU: Mendukung Template & Custom Field Array)
 ====================================================== */
@@ -37,50 +43,15 @@ const ScaleItemSchema = z.object({
   label: z.string().min(1, "Label wajib diisi"),
 });
 
-const TemplateTypeEnum = z.enum(["likert_5", "likert_6_tt", "custom"]);
-
 export const PertanyaanFormSchema = z.object({
   teksPertanyaan: z.string().min(5, "Pertanyaan minimal 5 karakter"),
-
-  // Urutan wajib diisi
-  urutan: z
-    .number({
-      error: (issue) =>
-        issue.input === undefined
-          ? "Urutan wajib diisi"
-          : "Urutan harus berupa angka",
-    })
-    .min(1, "Urutan minimal 1"),
-
-  // Field UI: Menentukan mode skala (likert_5, likert_6_tt, atau custom)
-  // Menggunakan z.union untuk tipe enum + transform string kosong menjadi undefined.
-  // Properti 'error'/errorMap yang bermasalah DIHAPUS, validasi required dilakukan di .superRefine.
-  templateType: z
-    .union([
-      z.literal("").transform(() => undefined), // Untuk menangani input select yang kosong
-      TemplateTypeEnum,
-    ])
-    .optional() // Dibuat optional karena select bisa kosong
-    .superRefine((val, ctx) => {
-      // Logika validasi required kustom:
-      if (!val) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Pilihan Skala wajib diisi",
-        });
-        return z.NEVER; // Menghentikan validasi lebih lanjut
-      }
-    }),
-
-  // Field data: Array untuk menampung semua poin skala
-  customScales: z
-    .array(ScaleItemSchema)
-    .min(2, "Skala minimal 2 poin")
-    .max(10, "Skala maksimal 10 poin")
-    .optional(),
-
-  // ID indikator tempat pertanyaan ini berada (Diperlukan saat CREATE/PATCH)
-  indikatorId: z.number().int().min(1, "Indikator wajib dipilih").optional(),
+  // ✅ Gunakan coerce agar input string otomatis jadi number
+  urutan: z.number().min(1, "Urutan minimal 1"),
+  indikatorId: z.number().min(1, "Indikator wajib dipilih"),
+  templateType: z.enum(["likert_5", "likert_6_tt", "custom"], {
+    message: "Pilih salah satu tipe template kuesioner",
+  }),
+  customScales: z.array(ScaleItemSchema).min(2, "Skala minimal 2 poin"),
 });
 
 export type PertanyaanFormValues = z.infer<typeof PertanyaanFormSchema>;

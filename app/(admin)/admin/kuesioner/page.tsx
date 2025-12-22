@@ -23,6 +23,9 @@ export default function KuesionerPage() {
     if (state.isError) {
         return <ErrorState onRetry={state.refetch} />;
     }
+    const kuesionerToDelete = state.data.find(
+        (item) => item.kuesionerId === state.deleteId
+    );
 
     return (
         <>
@@ -113,6 +116,7 @@ export default function KuesionerPage() {
 
                 {/* ================= DELETE ================= */}
                 <KuesionerDeleteDialog
+                    judul={kuesionerToDelete?.judul || ""}
                     open={!!state.deleteId}
                     onCancel={() => state.setDeleteId(null)}
                     onConfirm={state.confirmDelete}
