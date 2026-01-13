@@ -32,7 +32,6 @@ export type PublicKuesioner = {
     createdAt: string;
     updatedAt: string;
 };
-
 /* =========================
    PERTANYAAN (DETAIL)
 ========================= */

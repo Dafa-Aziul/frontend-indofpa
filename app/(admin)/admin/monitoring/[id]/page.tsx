@@ -1,4 +1,3 @@
-// fileName: src/app/admin/monitoring/[kuesionerId]/page.tsx
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -6,12 +5,11 @@ import PageHeader from "@/components/common/page-header";
 import ErrorState from "@/components/common/error-state";
 import AppBreadcrumb from "@/components/common/app-breadcrumb";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, FileSpreadsheet } from "lucide-react"; // Tambahkan FileSpreadsheet
 import { Table } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
-// Import komponen monitoring detail
-import { useMonitoringDetail } from "@/features/monitoring/detail/hooks"; // import HeaderCards from "@/features/monitoring/detail/components/header-cards"; 
+import { useMonitoringDetail } from "@/features/monitoring/detail/hooks"; 
 import ProgressChart from "@/features/monitoring/detail/components/progress-chart";
 import RespondenTable, { RespondenTableHeader } from "@/features/monitoring/detail/components/responden-table";
 import KuesionerPagination from "@/features/kuesioner/list/components/kuesioner-pagination";
@@ -20,24 +18,23 @@ import HeaderCards from "@/features/monitoring/detail/components/header-cards";
 export default function DetailMonitoringPage() {
     const params = useParams();
     const router = useRouter();
-    // Mendapatkan 
+    
+    // Pastikan menggunakan kuesionerId sesuai folder [kuesionerId]
     const kuesionerId = Number(params.id);
 
-    // **********************************************
-    // ✅ PERBAIKAN: MEMANGGIL HOOK DI TINGKAT ATAS
-    // **********************************************
     const {
         kuesionerInfo,
         respondenList,
         meta,
         isLoading,
         isError,
+        isExporting,        // ✅ Ambil dari hook
+        handleExportLaporan, // ✅ Ambil dari hook
         refetch,
         page,
         setPage,
     } = useMonitoringDetail(kuesionerId);
 
-    // --- Handlers ---
     const handleGoBack = () => {
         router.push('/admin/monitoring');
     };
@@ -52,22 +49,16 @@ export default function DetailMonitoringPage() {
         }
     };
 
-    // --- Render Loading/Error States ---
-
-    // Kasus ID Invalid (NaN/<=0) ditangani di hook, mengembalikan isError=true
     if (isError) {
-        // Cek eksplisit ID jika Anda ingin pesan error yang berbeda untuk NaN vs. error server
         if (isNaN(kuesionerId) || kuesionerId <= 0) {
             return (
                 <ErrorState
                     title="ID Kuesioner Tidak Valid"
-                    description="ID monitoring kuesioner pada URL tidak valid. Silakan kembali ke daftar monitoring."
+                    description="ID monitoring kuesioner pada URL tidak valid."
                     onRetry={() => router.push('/admin/monitoring')}
                 />
             );
         }
-
-        // Kasus Error Server/404
         return (
             <ErrorState
                 title="Gagal Memuat Detail Monitoring"
@@ -84,21 +75,33 @@ export default function DetailMonitoringPage() {
             </div>
         );
     }
-    const title = `Detail Monitoring — ${kuesionerInfo!.judul}`;
-    const targetResponden = kuesionerInfo!.targetResponden;
-    const responMasuk = kuesionerInfo!.totalResponden;
-    const progress = kuesionerInfo!.progress;
-
 
     return (
         <>
             <PageHeader
-                title={title}
+                title={`Detail Monitoring — ${kuesionerInfo?.judul}`}
                 action={
-                    <Button variant="outline" onClick={handleGoBack} className="gap-2">
-                        <ArrowLeft className="h-4 w-4" />
-                        Kembali ke Monitoring
-                    </Button>
+                    <div className="flex gap-2">
+                        {/* ✅ TOMBOL EXCEL BARU */}
+                        <Button 
+                            variant="outline" 
+                            onClick={handleExportLaporan}
+                            disabled={isExporting}
+                            className="gap-2 border-green-600 text-green-600"
+                        >
+                            {isExporting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <FileSpreadsheet className="h-4 w-4" />
+                            )}
+                            {isExporting ? "Mengekspor..." : "Export Excel"}
+                        </Button>
+
+                        <Button variant="outline" onClick={handleGoBack} className="gap-2">
+                            <ArrowLeft className="h-4 w-4" />
+                            Kembali
+                        </Button>
+                    </div>
                 }
             />
 
@@ -106,48 +109,42 @@ export default function DetailMonitoringPage() {
                 className="pb-3"
                 items={[
                     { label: "Monitoring", href: "/admin/monitoring" },
-                    { label: kuesionerInfo!.judul },
+                    { label: kuesionerInfo?.judul || "Detail" },
                 ]}
             />
 
             <div className="space-y-6">
-
-                {/* 1. Header Metrics (Target, Respon Masuk, Pencapaian, Tanggal) */}
                 <HeaderCards
                     kuesioner={kuesionerInfo!}
-                    startDate={kuesionerInfo!.startDate} // Contoh
-                    endDate={kuesionerInfo!.endDate}
+                    startDate={kuesionerInfo?.startDate} 
+                    endDate={kuesionerInfo?.endDate}
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* 2. Grafik Progress */}
                     <ProgressChart
-                        responded={responMasuk}
-                        target={targetResponden}
-                        progress={progress}
+                        responded={kuesionerInfo?.totalResponden || 0}
+                        target={kuesionerInfo?.targetResponden || 0}
+                        progress={kuesionerInfo?.progress || 0}
                     />
 
-                    {/* 3. Placeholder untuk Metrik Tambahan / Ringkasan */}
                     <Card>
                         <CardHeader>
                             <h3 className="text-xl font-semibold">Ringkasan Kuesioner</h3>
                         </CardHeader>
-                        <CardContent>
-                            <p className="text-sm">Kategori: <span className="font-semibold">{kuesionerInfo!.kategori.nama}</span></p>
-                            <p className="text-sm">Status: <span className="font-semibold">{kuesionerInfo!.status}</span></p>
+                        <CardContent className="space-y-2">
+                            <p className="text-sm text-muted-foreground">Kategori: <span className="font-semibold text-foreground">{kuesionerInfo?.kategori.nama}</span></p>
+                            <p className="text-sm text-muted-foreground">Status: <span className="font-semibold text-foreground">{kuesionerInfo?.status}</span></p>
                         </CardContent>
                     </Card>
                 </div>
 
-
-                {/* 4. Daftar Respon Masuk (Tabel) */}
                 <Card>
                     <CardHeader className="border-b">
-                        <h3 className="text-xl font-semibold">Daftar Respon ({responMasuk} Masuk)</h3>
+                        <h3 className="text-xl font-semibold">Daftar Respon ({kuesionerInfo?.totalResponden} Masuk)</h3>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="relative w-full overflow-x-auto">
-                            <Table className="min-w-full border bg-white shadow-sm">
+                    <CardContent className="space-y-4 pt-4">
+                        <div className="relative w-full overflow-x-auto rounded-md border">
+                            <Table className="min-w-full bg-white">
                                 <RespondenTableHeader />
                                 <RespondenTable
                                     data={respondenList}
@@ -161,8 +158,7 @@ export default function DetailMonitoringPage() {
                         </div>
                     </CardContent>
 
-                    {/* Pagination Responden */}
-                    {meta && responMasuk > 0 && (
+                    {meta && (kuesionerInfo?.totalResponden ?? 0) > 0 && (
                         <div className="p-4 border-t">
                             <KuesionerPagination
                                 page={page}
@@ -175,7 +171,6 @@ export default function DetailMonitoringPage() {
                         </div>
                     )}
                 </Card>
-
             </div>
         </>
     );

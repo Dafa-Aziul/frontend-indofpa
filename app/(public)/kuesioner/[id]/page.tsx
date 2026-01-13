@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   return {
     title: `Detail Kuesioner : ${id} | IndoFPA`,
-    description: "Lihat detail kuesioner publik",
+    description: "Lihat detail kuesioner publik secara transparan dan aman.",
   };
 }
 
@@ -21,83 +21,76 @@ export default async function PublicDetailPage({ params }: PageProps) {
   const { id } = await params;
 
   return (
-    <main className="relative min-h-screen bg-white">
-      {/* Background Decor - Konsisten dengan List Page */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[450px] bg-linear-to-b from-emerald-50/50 to-transparent -z-10" />
+    <main className="relative min-h-screen bg-white overflow-x-hidden">
+      {/* --- BACKGROUND DECOR --- */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-linear-to-b from-emerald-50/60 to-transparent -z-10" />
 
       <div className="container mx-auto py-12 px-4 md:py-20">
 
-        {/* BACK NAVIGATION */}
-        <div className="max-w-4xl mx-auto mb-10">
-          <Link
-            href="/kuesioner"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800 transition-colors group"
-          >
-            <div className="p-2 rounded-full bg-emerald-100 group-hover:bg-emerald-200 transition-colors">
-              <ChevronLeft className="h-4 w-4" />
-            </div>
-            Kembali ke Daftar
-          </Link>
+        {/* --- 2. BADGE INFORMASI (Rata Tengah Halaman) --- */}
+        <div className="max-w-4xl mx-auto flex justify-center mb-10">
+          <div className="inline-flex items-center gap-2 bg-emerald-100/80 backdrop-blur-sm text-emerald-700 px-5 py-2 rounded-full border border-emerald-200/50 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[10px] font-black uppercase tracking-[0.15em]">
+              Informasi Publik Terverifikasi
+            </span>
+          </div>
         </div>
 
-        {/* HEADER SECTION (HERO) */}
+        {/* --- 3. HERO SECTION (Judul vs Quick Info Card) --- */}
         <div className="max-w-4xl mx-auto mb-16">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 text-center md:text-left">
-            <div className="flex-1">
-              {/* Badge Aktif */}
-              <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full mb-6">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="text-xs font-bold uppercase tracking-widest">Informasi Publik</span>
-              </div>
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
 
-              <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
+            <div className="flex-1 text-center lg:text-left">
+              <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-[1.1]">
                 Detail <span className="text-emerald-600">Kuesioner.</span>
               </h1>
 
-              <p className="text-slate-600 text-lg md:text-xl leading-relaxed">
-                Pelajari tujuan dan informasi kuesioner sebelum memberikan kontribusi Anda.
-                Data Anda dikelola secara profesional dan anonim.
+              <p className="text-slate-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                Pelajari tujuan penelitian dan informasi kuesioner sebelum memberikan kontribusi.
+                Partisipasi Anda sangat berarti untuk pengembangan kualitas layanan kami.
               </p>
             </div>
 
-            {/* Quick Info Card */}
-            <div className="hidden lg:flex flex-col gap-3 p-6 bg-white border border-slate-100 shadow-xl shadow-emerald-900/5 rounded-3xl min-w-[260px]">
-              <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
-                <Timer className="h-4 w-4 text-emerald-500" />
-                <span>Estimasi 5-10 Menit</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
-                <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                <span>Terlindungi & Aman</span>
+            {/* Quick Info Card (Hanya muncul di Desktop) */}
+            <div className="hidden lg:flex flex-col gap-4 p-7 bg-white/40 backdrop-blur-md border border-emerald-100 shadow-2xl shadow-emerald-900/5 rounded-[2rem] min-w-[280px]">
+              <p className="text-[10px] font-black text-emerald-800/40 uppercase tracking-widest mb-1 border-b border-emerald-100 pb-2">
+                Ringkasan Akses
+              </p>
+              <div className="flex items-center gap-4 text-sm font-bold text-slate-700">
+                <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <span>Anonimitas Terjamin</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* DETAIL VIEW AREA */}
+        {/* --- 4. AREA KONTEN UTAMA (PublicDetailView) --- */}
         <div className="max-w-4xl mx-auto relative">
-          {/* Dekorasi Garis Halus */}
+          {/* Garis Aksen */}
           <div className="absolute -top-6 left-0 w-full h-px bg-linear-to-r from-transparent via-slate-200 to-transparent" />
 
-          <div className="bg-white/70 backdrop-blur-md rounded-4xl border border-white shadow-2xl shadow-slate-200/50 min-h-[400px]">
+          <div className="bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-slate-200/60 overflow-hidden min-h-[500px]">
             <Suspense fallback={<LoadingState />}>
               <PublicDetailView id={id} />
             </Suspense>
           </div>
 
-          {/* FOOTER STATS */}
-          <div className="flex items-center justify-center gap-8 mt-12 text-sm font-medium text-slate-400">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4 text-emerald-500" />
-              <span>Ditinjau Secara Berkala</span>
+          {/* --- 5. FOOTER STATS --- */}
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mt-16 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+            <div className="flex items-center gap-2.5 group">
+              <ClipboardList className="h-4 w-4 text-emerald-500/40 group-hover:text-emerald-500 transition-colors" />
+              <span>Audit Data Berkala</span>
             </div>
-            <div className="w-1.5 h-1.5 bg-slate-200 rounded-full" />
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              <span>Standar Keamanan IndoFPA</span>
+            <div className="hidden md:block w-1.5 h-1.5 bg-slate-200 rounded-full" />
+            <div className="flex items-center gap-2.5 group">
+              <ShieldCheck className="h-4 w-4 text-emerald-500/40 group-hover:text-emerald-500 transition-colors" />
+              <span>Protokol Keamanan IndoFPA</span>
             </div>
           </div>
         </div>
@@ -107,20 +100,21 @@ export default async function PublicDetailPage({ params }: PageProps) {
   );
 }
 
-/* ================= LOADING COMPONENT ================= */
 
+//LOADING COMPONENT (GLASSMORPHISM STYLE)
 function LoadingState() {
   return (
-    <div className="flex flex-col items-center justify-center py-40 px-10 text-center space-y-4">
-      {/* Spinner Emerald */}
-      <div className="relative flex h-12 w-12">
+    <div className="flex flex-col items-center justify-center py-48 px-10 text-center space-y-6">
+      <div className="relative flex h-16 w-16">
         <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20"></div>
-        <div className="relative inline-flex rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 animate-spin"></div>
+        <div className="relative inline-flex rounded-full h-16 w-16 border-4 border-slate-100 border-t-emerald-600 animate-spin"></div>
       </div>
 
-      <div className="space-y-1">
-        <p className="text-slate-900 font-bold text-lg tracking-tight">Memuat Data</p>
-        <p className="text-slate-400 text-sm animate-pulse">Menyiapkan informasi detail...</p>
+      <div className="space-y-2">
+        <p className="text-slate-900 font-black text-xl tracking-tight uppercase">Sinkronisasi Data</p>
+        <p className="text-slate-400 text-sm font-medium animate-pulse tracking-wide">
+          Mengambil rincian kuesioner dari server...
+        </p>
       </div>
     </div>
   );

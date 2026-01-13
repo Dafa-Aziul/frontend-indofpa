@@ -1,4 +1,3 @@
-// fileName: src/features/monitoring/detail/hooks/use-monitoring-detail.ts
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -8,9 +7,8 @@ import {
     RespondenItem,
     KuesionerMonitoringDetail,
 } from "./types";
-import { getMonitoringDetail } from "./services";
+import { getMonitoringDetail, exportMonitoringLaporan } from "./services"; // ✅ Import service ekspor
 
-// Asumsi getApiErrorMessage ada di project Anda
 function getApiErrorMessage(
     error: unknown,
     defaultMessage: string = "Gagal memuat data"
@@ -33,9 +31,11 @@ export function useMonitoringDetail(kuesionerId: number) {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
+    
+    // ✅ State tambahan untuk proses ekspor
+    const [isExporting, setIsExporting] = useState(false);
 
     const fetchData = useCallback(async () => {
-        // Cek apakah ID valid sebelum fetching
         if (isNaN(kuesionerId) || kuesionerId <= 0) {
             setIsLoading(false);
             setIsError(true);
@@ -46,13 +46,11 @@ export function useMonitoringDetail(kuesionerId: number) {
         setIsError(false);
 
         try {
-            // Memanggil service dengan parameter pagination/search
             const res = await getMonitoringDetail(kuesionerId);
-
             setKuesionerInfo(res.kuesioner);
             setRespondenList(res.items);
             setMeta(res.meta);
-        } catch (e: unknown) { // ✅ Menggunakan 'e: unknown'
+        } catch (e: unknown) {
             setIsError(true);
             setKuesionerInfo(null);
             setRespondenList([]);
@@ -68,8 +66,26 @@ export function useMonitoringDetail(kuesionerId: number) {
         }
     }, [kuesionerId]);
 
+    // ✅ Fungsi Handler untuk Ekspor Laporan
+    const handleExportLaporan = async () => {
+        if (!kuesionerId) return;
+        
+        setIsExporting(true);
+        try {
+            // Gunakan toast.promise agar user melihat progress-nya
+            await toast.promise(exportMonitoringLaporan(kuesionerId), {
+                loading: "Sedang menyiapkan laporan Excel...",
+                success: "Laporan berhasil diunduh",
+                error: (err) => getApiErrorMessage(err, "Gagal mengekspor laporan"),
+            });
+        } catch (error) {
+            console.error("Export error:", error);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     useEffect(() => {
-        // Cek lagi di useEffect sebelum memicu fetch
         if (isNaN(kuesionerId) || kuesionerId <= 0) {
             setIsLoading(false);
             setIsError(true);
@@ -84,6 +100,8 @@ export function useMonitoringDetail(kuesionerId: number) {
         meta,
         isLoading,
         isError,
+        isExporting, // ✅ Kembalikan state exporting
+        handleExportLaporan, // ✅ Kembalikan fungsi handler
         refetch: fetchData,
         page,
         setPage,

@@ -54,7 +54,6 @@ export default function PublicListPage() {
             <PublicListView />
           </div>
         </div>
-
       </div>
     </main>
   );

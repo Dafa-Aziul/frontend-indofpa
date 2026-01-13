@@ -28,13 +28,15 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body>
-                <DashboardLayout>
-                    {children}
-                </DashboardLayout>
-                <Toaster />
-            </body>
-        </html>
+
+        <>
+            <DashboardLayout>
+                {children}
+            </DashboardLayout>
+            <Toaster />
+        </>
+
+
+
     );
 }

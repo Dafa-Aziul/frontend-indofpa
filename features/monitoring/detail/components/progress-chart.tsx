@@ -18,10 +18,6 @@ export default function ProgressChart({ responded, target, progress }: ProgressC
         { name: 'Respon Masuk', value: responded, color: COLORS[0] },
         { name: 'Target Tersisa', value: remaining > 0 ? remaining : 0, color: COLORS[1] },
     ];
-
-    // Total responden di bawah 0 tidak diizinkan di grafik
-    const totalCount = target;
-
     // Persentase target tersisa
     const remainingPercent = ((remaining / target) * 100).toFixed(2);
 
