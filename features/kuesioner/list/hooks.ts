@@ -39,7 +39,7 @@ type Kategori = {
  */
 function getApiErrorMessage(
   error: unknown,
-  defaultMessage: string = "Gagal memproses permintaan"
+  defaultMessage: string = "Gagal memproses permintaan",
 ) {
   // Casting ke any di sini diperbolehkan karena error response Axios sangat dinamis
   const err = error as {
@@ -59,6 +59,7 @@ function getApiErrorMessage(
 
 export function useKuesioner() {
   /* ===== DATA ===== */
+  const LIMIT = 10;
   const [data, setData] = useState<Kuesioner[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);
 
@@ -69,9 +70,11 @@ export function useKuesioner() {
   /* ===== FILTER ===== */
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   /* ===== STATE ===== */
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // FIRST LOAD
+  const [isFetching, setIsFetching] = useState(false); // SEARCH / PAGE
   const [isError, setIsError] = useState(false);
 
   /* ===== FORM KUESIONER ===== */
@@ -93,28 +96,30 @@ export function useKuesioner() {
   /* ================= FETCH ================= */
 
   const fetchData = useCallback(async () => {
+    setIsFetching(true);
+    setIsFetching(true);
+    setIsError(false);
+    
     try {
-      setIsLoading(true);
-      setIsError(false);
-
       const res = await getKuesioner({
         page,
-        limit: 10,
-        search,
+        limit: LIMIT,
+        search: debouncedSearch,
       });
 
       setData(Array.isArray(res.data) ? res.data : []);
       setMeta(res.meta ?? null);
     } catch (e) {
-      // ✅ Tangkap error
       setIsError(true);
       setData([]);
       setMeta(null);
-      toast.error(getApiErrorMessage(e, "Gagal memuat daftar kuesioner")); // ✅ Pakai utilitas
+      toast.error(getApiErrorMessage(e, "Gagal memuat daftar kuesioner"));
     } finally {
-      setIsLoading(false);
+      setIsFetching(false);
+
+      if (isLoading) setIsLoading(false);
     }
-  }, [page, search]);
+  }, [page, debouncedSearch, isLoading]);
 
   const fetchKategori = useCallback(async () => {
     try {
@@ -131,9 +136,20 @@ export function useKuesioner() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
     fetchKategori();
-  }, [fetchData, fetchKategori]);
+  }, [fetchKategori]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   /* ================= SUBMIT KUESIONER ================= */
 
@@ -240,7 +256,7 @@ export function useKuesioner() {
             if (values[key] !== distribusiDefaultValues[key]) {
               payload[key] = values[key];
             }
-          }
+          },
         );
 
         if (Object.keys(payload).length === 0) {
@@ -277,8 +293,10 @@ export function useKuesioner() {
     setPage,
     search,
     setSearch,
+    limit: LIMIT,
 
-    isLoading,
+    isLoading, // FIRST LOAD (skeleton)
+    isFetching,
     isError,
 
     // Kuesioner Form

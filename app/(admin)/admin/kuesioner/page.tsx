@@ -4,25 +4,27 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Search } from "lucide-react";
 
 import KuesionerTable from "@/features/kuesioner/list/components/kuesioner-table";
 import KuesionerPagination from "@/features/kuesioner/list/components/kuesioner-pagination";
 import KuesionerDeleteDialog from "@/features/kuesioner/list/components/kuesioner-delete-dialog";
 import KuesionerShareDialog from "@/features/kuesioner/list/components/kuesioner-share-dialog";
+import KuesionerFormModal from "@/features/kuesioner/list/components/kuesioner-form-modal";
 
 import { useKuesioner } from "@/features/kuesioner/list/hooks";
 import PageHeader from "@/components/common/page-header";
 import AppBreadcrumb from "@/components/common/app-breadcrumb";
-import KuesionerFormModal from "@/features/kuesioner/list/components/kuesioner-form-modal";
 import ErrorState from "@/components/common/error-state";
 
 export default function KuesionerPage() {
     const state = useKuesioner();
 
-    // ===== ERROR STATE =====
-    if (state.isError) {
+    // ===== FULL PAGE ERROR (FIRST LOAD ONLY) =====
+    if (state.isError && state.data.length === 0 && !state.isLoading) {
         return <ErrorState onRetry={state.refetch} />;
     }
+
     const kuesionerToDelete = state.data.find(
         (item) => item.kuesionerId === state.deleteId
     );
@@ -39,29 +41,33 @@ export default function KuesionerPage() {
                 ]}
             />
 
-            <Card >
+            <Card>
                 {/* ================= HEADER ================= */}
                 <CardHeader className="border-b">
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                        <Input
-                            placeholder="Cari kuesioner..."
-                            value={state.search}
-                            onChange={(e) => {
-                                state.setSearch(e.target.value);
-                                state.setPage(1);
-                            }}
-                            className="max-w-sm"
-                        />
 
+                        {/* Search */}
+                        <div className="relative w-full max-w-sm">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Cari kuesioner..."
+                                value={state.search}
+                                onChange={(e) => state.setSearch(e.target.value)}
+                                className="pl-9" // ⬅️ penting biar teks tidak nabrak icon
+                            />
+                        </div>
+
+                        {/* Button */}
                         <Button
                             onClick={() => {
-                                state.setEditData(null); // ✅ reset edit state
+                                state.setEditData(null);
                                 state.setOpenForm(true);
                             }}
                         >
                             <Plus className="mr-2 h-4 w-4" />
                             Tambah Kuesioner
                         </Button>
+
                     </div>
                 </CardHeader>
 
@@ -70,13 +76,14 @@ export default function KuesionerPage() {
                     <KuesionerTable
                         data={state.data}
                         page={state.page}
-                        limit={10}
+                        limit={state.limit} // ✅ dari hook
+                        isLoading={state.isLoading || state.isFetching} // ⬅️ jika table support
                         onEdit={(row) => {
-                            state.setEditData({ ...row }); // ✅ clone object
+                            state.setEditData({ ...row });
                             state.setOpenForm(true);
                         }}
-                        onDelete={(id) => state.setDeleteId(id)}
-                        onShare={(id) => state.openShareDialog(id)}
+                        onDelete={state.setDeleteId}
+                        onShare={state.openShareDialog}
                     />
 
                     {state.meta && (
@@ -90,8 +97,7 @@ export default function KuesionerPage() {
                         />
                     )}
                 </CardContent>
-
-                {/* ================= FORM KUESIONER ================= */}
+                {/* ================= FORM ================= */}
                 <KuesionerFormModal
                     open={state.openForm}
                     defaultValues={
@@ -106,12 +112,12 @@ export default function KuesionerPage() {
                             }
                             : undefined
                     }
+                    kategoriList={state.kategori}
+                    onSubmit={state.submitForm}
                     onClose={() => {
                         state.setOpenForm(false);
                         state.setEditData(null);
                     }}
-                    onSubmit={state.submitForm}
-                    kategoriList={state.kategori}
                 />
 
                 {/* ================= DELETE ================= */}

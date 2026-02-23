@@ -18,6 +18,7 @@ type Props = {
     data: Kuesioner[];
     page: number;
     limit: number;
+    isLoading: boolean;
     onDelete: (id: number) => void;
     onEdit: (row: Kuesioner) => void;
     onShare: (id: number) => void;

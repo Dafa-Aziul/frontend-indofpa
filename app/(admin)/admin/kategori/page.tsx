@@ -1,3 +1,4 @@
+// src/app/admin/kategori/page.tsx
 "use client";
 
 import {
@@ -6,10 +7,10 @@ import {
     CardContent,
 } from "@/components/ui/card";
 
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
+import { Search } from "lucide-react";
 
 import KategoriTable from "@/features/kategori/components/kategori-table";
 import KategoriFormModal from "@/features/kategori/components/kategori-form-modal";
@@ -24,7 +25,6 @@ import AppBreadcrumb from "@/components/common/app-breadcrumb";
 export default function KategoriPage() {
     const state = useKategori();
 
-    // ❗ Error boleh early return
     if (state.isError) {
         return <ErrorState onRetry={state.refetch} />;
     }
@@ -32,35 +32,38 @@ export default function KategoriPage() {
     const kategoriToDelete = state.data.find(
         (item) => item.kategoriId === state.deleteId
     );
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        state.setSearch(e.target.value);
+        state.setPage(1);
+    };
+
     return (
         <>
-            <PageHeader
-                title="Halaman Kategori"
-            />
+            <PageHeader title="Halaman Kategori" />
+
             <AppBreadcrumb
                 className="pb-3"
                 items={[
-                    { label: "Daftar Kategori", href: "/admin/kategori" },
-                    { label: "Daftar Kategori", href: "/admin/kategori" },
-                    { label: "asfasd" }
+                    { label: "Kategori", href: "/admin/kategori" },
+                    { label: "Daftar Kategori" },
                 ]}
             />
+
             <Card>
-                {/* ================= HEADER (SEARCH + ACTION) ================= */}
+                {/* ================= HEADER ================= */}
                 <CardHeader className="border-b">
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                        {/* SEARCH */}
-                        <Input
-                            placeholder="Cari kategori..."
-                            value={state.search}
-                            onChange={(e) => {
-                                state.setSearch(e.target.value);
-                                state.setPage(1);
-                            }}
-                            className="w-full md:max-w-sm"
-                        />
+                        <div className="relative flex-1 max-w-sm">
+                            <Input
+                                placeholder="Cari Kategori..."
+                                value={state.search}
+                                onChange={handleSearchChange}
+                                className="pl-9"
+                            />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
 
-                        {/* ACTION */}
                         <Button onClick={() => state.setOpenForm(true)}>
                             <Plus className="mr-2 h-4 w-4" />
                             Tambah Kategori
@@ -70,29 +73,27 @@ export default function KategoriPage() {
 
                 {/* ================= CONTENT ================= */}
                 <CardContent className="space-y-4">
-                    <>
-                        <KategoriTable
-                            data={state.data}
-                            page={state.page}
-                            limit={10}
-                            onEdit={(row) => {
-                                state.setEditData(row);
-                                state.setOpenForm(true);
-                            }}
-                            onDelete={(id) => state.setDeleteId(id)}
-                        />
+                    <KategoriTable
+                        data={state.data}
+                        page={state.page}
+                        limit={10}
+                        onEdit={(row) => {
+                            state.setEditData(row);
+                            state.setOpenForm(true);
+                        }}
+                        onDelete={(id) => state.setDeleteId(id)}
+                    />
 
-                        {state.meta && (
-                            <KategoriPagination
-                                page={state.page}
-                                pages={state.meta.pages}
-                                limit={state.meta.limit}
-                                total={state.meta.total}
-                                count={state.data.length}
-                                onPageChange={state.setPage}
-                            />
-                        )}
-                    </>
+                    {state.meta && (
+                        <KategoriPagination
+                            page={state.page}
+                            pages={state.meta.pages}
+                            limit={state.meta.limit}
+                            total={state.meta.total}
+                            count={state.data.length}
+                            onPageChange={state.setPage}
+                        />
+                    )}
                 </CardContent>
 
                 {/* ================= MODALS ================= */}

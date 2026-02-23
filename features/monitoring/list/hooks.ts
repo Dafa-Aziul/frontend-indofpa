@@ -11,7 +11,7 @@ import {
 import { getMonitoringList } from "./services";
 
 // ======================================================
-// ERROR UTILITY (Menggunakan unknown dan type checking)
+// ERROR UTILITY
 // ======================================================
 
 interface ApiResponseError {
@@ -23,28 +23,17 @@ interface ApiResponseError {
 }
 
 function getApiErrorMessage(
-  error: unknown, // ✅ Ganti 'any' menjadi 'unknown'
-  defaultMessage: string = "Gagal memproses permintaan"
+  error: unknown,
+  defaultMessage = "Gagal memproses permintaan"
 ): string {
-  const apiError = error as ApiResponseError; // Casting sementara untuk pengecekan respons umum
+  const apiError = error as ApiResponseError;
 
-  if (
-    apiError &&
-    apiError.response &&
-    apiError.response.data &&
-    apiError.response.data.message
-  ) {
+  if (apiError?.response?.data?.message) {
     const message = apiError.response.data.message;
-
-    if (typeof message === "string") {
-      return message;
-    }
-    if (Array.isArray(message) && message.length > 0) {
-      return message[0];
-    }
+    if (typeof message === "string") return message;
+    if (Array.isArray(message) && message.length > 0) return message[0];
   }
 
-  // Pengecekan tipe Error standar
   if (error instanceof Error) {
     return error.message;
   }
@@ -58,24 +47,55 @@ export function useMonitoring() {
   const [data, setData] = useState<MonitoringRow[]>([]);
   const [meta, setMeta] = useState<MonitoringResponse["meta"] | null>(null);
 
-  // State Filter & Pagination
+  // ======================
+  // FILTER & PAGINATION
+  // ======================
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>(""); // Untuk filter status
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
-  const [isLoading, setIsLoading] = useState(true);
+  // 🔹 DEBOUNCED STATE
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [debouncedStatus, setDebouncedStatus] = useState("");
+
+  // ======================
+  // UX STATE
+  // ======================
+  const [isFetching, setIsFetching] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  // ======================
+  // DEBOUNCE FILTER (500ms)
+  // ======================
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setDebouncedStatus(statusFilter);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search, statusFilter]);
+
+  // ======================
+  // FETCH DATA (SMOOTH)
+  // ======================
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
     setIsError(false);
+    setIsFetching(true);
+
+    // ⏳ Loader muncul hanya jika fetch lama
+    const loaderTimer = setTimeout(() => {
+      setShowLoader(true);
+    }, 200);
 
     try {
       const params: MonitoringFilterParams = {
         page,
         limit: DEFAULT_LIMIT,
-        search: search || undefined,
-        status: statusFilter || undefined,
+        search: debouncedSearch || undefined,
+        status: debouncedStatus || undefined,
       };
 
       const res = await getMonitoringList(params);
@@ -83,27 +103,32 @@ export function useMonitoring() {
       setData(res.data);
       setMeta(res.meta);
     } catch (e: unknown) {
-      // ✅ Tangkap sebagai 'unknown'
       setIsError(true);
-      setData([]);
-      setMeta(null);
       toast.error(getApiErrorMessage(e, "Gagal memuat data monitoring."));
     } finally {
-      setIsLoading(false);
+      clearTimeout(loaderTimer);
+      setIsFetching(false);
+
+      // ✨ Fade out loader
+      setTimeout(() => setShowLoader(false), 150);
     }
-  }, [page, search, statusFilter]);
+  }, [page, debouncedSearch, debouncedStatus]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   return {
+    // DATA
     data,
     meta,
-    isLoading,
+
+    // UX
+    isFetching,
+    showLoader,
     isError,
 
-    // Controls
+    // CONTROLS
     page,
     setPage,
     search,

@@ -1,64 +1,79 @@
-// src/features/analisis/list/hooks/useAnalisis.ts
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-// PERBAIKAN PATH: Menggunakan path yang benar (dua tingkat ke atas)
+import { useState, useCallback, useEffect } from "react";
 import { getAnalisisList } from "./services";
 import { AnalisisItem, AnalisisMeta } from "./schemas";
 
 type AnalisisState = {
   data: AnalisisItem[];
   meta: AnalisisMeta | null;
-  isLoading: boolean;
+
+  isLoading: boolean;   // hanya first load
+  isFetching: boolean; // search & pagination
   isError: boolean;
+
   refetch: () => void;
 
-  // Pagination & Search States
   page: number;
   setPage: (page: number) => void;
   limit: number;
+
   search: string;
   setSearch: (search: string) => void;
 };
 
 export function useAnalisis(): AnalisisState {
-  const DEFAULT_LIMIT = 10;
+  const LIMIT = 10;
 
   const [data, setData] = useState<AnalisisItem[]>([]);
   const [meta, setMeta] = useState<AnalisisMeta | null>(null);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);     // FIRST LOAD
+  const [isFetching, setIsFetching] = useState(false); // SEARCH / PAGE
   const [isError, setIsError] = useState(false);
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [limit] = useState(DEFAULT_LIMIT);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  // ======================
+  // DEBOUNCE SEARCH (500ms)
+  // ======================
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // ======================
+  // FETCH DATA
+  // ======================
   const fetchData = useCallback(async () => {
-    // Tambahkan delay kecil untuk debounce search (opsional)
-    // await new Promise(resolve => setTimeout(resolve, 300));
-
-    setIsLoading(true);
+    setIsFetching(true);
     setIsError(false);
+
     try {
-      const result = await getAnalisisList({ page, limit, search });
+      const result = await getAnalisisList({
+        page,
+        limit: LIMIT,
+        search: debouncedSearch,
+      });
+
       setData(result.data);
       setMeta(result.meta);
     } catch (error) {
       console.error("Gagal fetch analisis:", error);
       setIsError(true);
-      setData([]);
-      setMeta(null);
     } finally {
-      setIsLoading(false);
+      setIsFetching(false);
+      setIsLoading(false); // hanya mati sekali setelah fetch pertama
     }
-  }, [page, limit, search]);
+  }, [page, debouncedSearch]);
 
-  useMemo(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const refetch = useCallback(() => {
+  useEffect(() => {
     fetchData();
   }, [fetchData]);
 
@@ -66,11 +81,12 @@ export function useAnalisis(): AnalisisState {
     data,
     meta,
     isLoading,
+    isFetching,
     isError,
-    refetch,
+    refetch: fetchData,
     page,
     setPage,
-    limit,
+    limit: LIMIT,
     search,
     setSearch,
   };

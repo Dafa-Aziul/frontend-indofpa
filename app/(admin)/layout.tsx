@@ -35,8 +35,5 @@ export default function RootLayout({
             </DashboardLayout>
             <Toaster />
         </>
-
-
-
     );
 }
