@@ -16,7 +16,7 @@ export default function Home() {
       <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[500px] h-[500px] bg-emerald-50 rounded-full blur-3xl opacity-50 -z-10" />
       <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[400px] h-[400px] bg-emerald-50 rounded-full blur-3xl opacity-50 -z-10" />
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto p-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 py-12 md:py-24 items-center">
 
           {/* BAGIAN TEKS */}
@@ -25,7 +25,7 @@ export default function Home() {
             {/* Badge Baru */}
             <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1 rounded-full w-fit animate-fade-in">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span className="text-xs font-bold uppercase tracking-wider">Update v2.0 Terintegrasi</span>

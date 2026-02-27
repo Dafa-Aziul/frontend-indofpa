@@ -59,7 +59,7 @@ export const profileFormSchema = z.object({
         ].some((domain) => email.endsWith(`@${domain}`)),
       {
         message: "Email sementara tidak diperbolehkan",
-      }
+      },
     ),
 
   // ✅ Menggunakan { message: "..." } agar kompatibel dengan Zod Overload
@@ -113,3 +113,10 @@ export const submitKuesionerSchema = z.object({
 });
 
 export type SubmitPayload = z.infer<typeof submitKuesionerSchema>;
+
+interface Pertanyaan {
+  pertanyaanId: string;
+  teksPertanyaan: string;
+  // Pakai Record<string, string> agar bisa diakses pakai variabel key
+  labelSkala: Record<string, string>;
+}

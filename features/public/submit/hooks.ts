@@ -52,7 +52,7 @@ export function useFillKuesioner(kodeAkses: string) {
       // Pastikan res.data berisi objek yang ada distribusiId & kuesioner
       setData(res.data);
     } catch (error) {
-      toast.error("Gagal mengambil data kuesioner");
+      toast.error(error instanceof Error ? error.message : "Gagal mengambil data kuesioner");
     } finally {
       setIsLoading(false);
     }
@@ -102,6 +102,7 @@ export function useFillKuesioner(kodeAkses: string) {
       }
 
       // 4. Jika lolos, lanjut ke pertanyaan
+      setIsValidatingEmail(false);
       setStep(2);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: unknown) {
@@ -143,7 +144,7 @@ export function useFillKuesioner(kodeAkses: string) {
       toast.success("Kuesioner berhasil dikirim! Terima kasih.");
       router.push("/kuesioner");
     } catch (error) {
-      toast.error("Gagal mengirim kuesioner. Silakan coba lagi.");
+      toast.error(error instanceof Error ? error.message : "Gagal mengirim kuesioner. Silakan coba lagi.");
     } finally {
       setIsSubmitting(false);
     }
