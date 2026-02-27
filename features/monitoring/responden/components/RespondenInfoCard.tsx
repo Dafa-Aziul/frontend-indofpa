@@ -8,6 +8,21 @@ import {
 import { RespondenDetail } from '../types';
 import { cn } from "@/lib/utils";
 
+// --- MAPPING FORMATTER ---
+const GENDER_MAP: Record<string, string> = {
+    "L": "Laki-laki",
+    "P": "Perempuan"
+};
+
+const USIA_MAP: Record<string, string> = {
+    "USIA_18_24": "18-24 Tahun",
+    "USIA_25_34": "25-34 Tahun",
+    "USIA_35_44": "35-44 Tahun",
+    "USIA_45_54": "45-54 Tahun",
+    "USIA_55_64": "55-64 Tahun",
+    "USIA_65_PLUS": "65+ Tahun"
+};
+
 interface RespondenInfoCardProps {
     responden: RespondenDetail;
     formatDurasi: (d: number | null) => string;
@@ -85,8 +100,8 @@ const RespondenInfoCard: React.FC<RespondenInfoCardProps> = ({ responden, format
                     <div className="grid gap-1">
                         <InfoRow icon={User} label="Nama Lengkap" value={responden.nama} />
                         <InfoRow icon={Mail} label="Alamat Email" value={responden.email} />
-                        <InfoRow icon={User2} label="Jenis Kelamin" value={responden.jenisKelamin} />
-                        <InfoRow icon={Calendar} label="Kategori Usia" value={responden.usiaKategori} />
+                        <InfoRow icon={User2} label="Jenis Kelamin" value={GENDER_MAP[responden.jenisKelamin] || responden.jenisKelamin} />
+                        <InfoRow icon={Calendar} label="Kategori Usia" value={USIA_MAP[responden.usiaKategori] || responden.usiaKategori} />
                         <InfoRow icon={Edit} label="Pekerjaan" value={responden.pekerjaan} />
                         <InfoRow icon={MapPin} label="Agama" value={responden.agama} />
                     </div>
