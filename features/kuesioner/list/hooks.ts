@@ -12,6 +12,7 @@ import {
   getKategori,
   createDistribusi,
   patchDistribusi,
+  importKuesioner,
 } from "./services";
 
 import { Kuesioner } from "./types";
@@ -93,13 +94,16 @@ export function useKuesioner() {
   const [distribusiDefaultValues, setDistribusiDefaultValues] =
     useState<KuesionerDistribusiValues | null>(null);
 
+  /* ================= IMPORT KUESIONER ================= */
+  const [openImport, setOpenImport] = useState(false);
+
   /* ================= FETCH ================= */
 
   const fetchData = useCallback(async () => {
     setIsFetching(true);
     setIsFetching(true);
     setIsError(false);
-    
+
     try {
       const res = await getKuesioner({
         page,
@@ -281,6 +285,20 @@ export function useKuesioner() {
     }
   };
 
+  /* ================= IMPORT KUESIONER ================= */
+
+  const submitImport = async (file: File) => {
+    try {
+      await importKuesioner(file);
+      toast.success("Import kuesioner berhasil");
+      fetchData();
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Gagal mengimport kuesioner"));
+    } finally {
+      setOpenImport(false);
+    }
+  };
+
   /* ================= RETURN ================= */
 
   return {
@@ -316,6 +334,11 @@ export function useKuesioner() {
     openShareDialog,
     closeShareDialog,
     submitShare,
+
+    // Import
+    openImport,
+    setOpenImport,
+    submitImport,
 
     // Mutasi
     submitForm,

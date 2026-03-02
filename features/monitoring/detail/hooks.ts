@@ -7,7 +7,7 @@ import {
     RespondenItem,
     KuesionerMonitoringDetail,
 } from "./types";
-import { getMonitoringDetail, exportMonitoringLaporan } from "./services"; // ✅ Import service ekspor
+import { getMonitoringDetail, exportMonitoringLaporan, importRespondenExcel, ImportRespondenSuccess} from "./services"; // ✅ Import service ekspor
 
 function getApiErrorMessage(
     error: unknown,
@@ -100,12 +100,74 @@ export function useMonitoringDetail(kuesionerId: number) {
         meta,
         isLoading,
         isError,
-        isExporting, // ✅ Kembalikan state exporting
-        handleExportLaporan, // ✅ Kembalikan fungsi handler
+        isExporting, 
+        handleExportLaporan,
         refetch: fetchData,
         page,
         setPage,
         search,
         setSearch,
+    };
+}
+
+export function useImportResponden(kuesionerId: number) {
+    const [open, setOpen] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const resetState = () => {
+    setFile(null);
+    setLoading(false);
+    };
+
+    const onOpen = () => {
+    resetState();
+    setOpen(true);
+    };
+
+    const onClose = () => {
+    resetState();
+    setOpen(false);
+    };
+
+    const onFileSelect = (selected: File | null) => {
+    setFile(selected);
+    };
+
+    const submit = async (): Promise<ImportRespondenSuccess | null> => {
+    if (!file) {
+        toast.error("Silakan pilih file Excel (.xlsx)");
+        return null;
+    }
+
+    try {
+        setLoading(true);
+
+        const result = await importRespondenExcel(kuesionerId, file);
+
+        toast.success(result.message);
+        onClose();
+
+        return result;
+    } catch (error) {
+        const err = error as Error;
+        toast.error(err.message);
+        return null;
+    } finally {
+        setLoading(false);
+    }
+    };
+
+    return {
+    /** STATE */
+    open,
+    file,
+    loading,
+
+    /** HANDLER */
+    onOpen,
+    onClose,
+    onFileSelect,
+    submit,
     };
 }

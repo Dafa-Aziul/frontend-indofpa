@@ -51,3 +51,16 @@ export function patchDistribusi(
     api.patch(kuesionerApi.distributionUpdate(distribusiId), payload)
   );
 }
+
+export function importKuesioner(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiClient(() =>
+    api.post(kuesionerApi.import, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+  );
+}

@@ -28,7 +28,8 @@ export default function AnalisisPage() {
 
     return (
         <>
-            <PageHeader title="Halaman Analisis Kuesioner" />
+            <PageHeader title="Halaman Analisis Kuesioner" 
+            action/>
 
             <AppBreadcrumb
                 className="pb-3"

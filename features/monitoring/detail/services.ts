@@ -1,17 +1,34 @@
 import api from "@/lib/axios";
 import { MonitoringDetailResponse } from "./types";
 
+export interface ImportRespondenSuccess {
+  message: string;
+  responden: number;
+  pertanyaan: number;
+  jawaban: number;
+}
+
+/** Error shape yang biasa dikirim backend IndoFPA */
+export interface ApiErrorResponse {
+  success?: boolean;
+  message: string;
+  errors?: unknown;
+}
+
 const MONITORING_DETAIL_ENDPOINT = (id: number) =>
   `/api/monitoring/${id}/responden`;
 
 const MONITORING_EXPORT_ENDPOINT = (id: number) =>
   `/api/monitoring/${id}/export`;
 
+const IMPORT_RESPONDEN_ENDPOINT = (id: number) =>
+  `/api/monitoring/${id}/import-responden`;
+
 /**
  * Mengambil data detail monitoring (ringkasan + daftar responden).
  */
 export function getMonitoringDetail(
-  kuesionerId: number
+  kuesionerId: number,
 ): Promise<MonitoringDetailResponse> {
   return api
     .get(MONITORING_DETAIL_ENDPOINT(kuesionerId))
@@ -22,7 +39,7 @@ export function getMonitoringDetail(
  * Mengekspor laporan kuesioner dalam format Excel.
  */
 export async function exportMonitoringLaporan(
-  kuesionerId: number
+  kuesionerId: number,
 ): Promise<void> {
   try {
     const response = await api.get(MONITORING_EXPORT_ENDPOINT(kuesionerId), {
@@ -63,5 +80,35 @@ export async function exportMonitoringLaporan(
   } catch (error) {
     console.error("Gagal mengekspor laporan:", error);
     throw error;
+  }
+}
+
+export async function importRespondenExcel(
+  kuesionerId: number,
+  file: File,
+): Promise<ImportRespondenSuccess> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await api.post<ImportRespondenSuccess>(
+      IMPORT_RESPONDEN_ENDPOINT(kuesionerId),
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    );
+
+    return res.data;
+  } catch (err) {
+    const axiosErr = err as {
+      response?: { data?: ApiErrorResponse };
+      message?: string;
+    };
+
+    const backendMsg =
+      axiosErr.response?.data?.message ?? axiosErr.message ?? "Import gagal";
+
+    throw new Error(backendMsg);
   }
 }

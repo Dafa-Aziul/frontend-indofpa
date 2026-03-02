@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { Search } from "lucide-react";
 
 import KuesionerTable from "@/features/kuesioner/list/components/kuesioner-table";
@@ -11,6 +11,7 @@ import KuesionerPagination from "@/features/kuesioner/list/components/kuesioner-
 import KuesionerDeleteDialog from "@/features/kuesioner/list/components/kuesioner-delete-dialog";
 import KuesionerShareDialog from "@/features/kuesioner/list/components/kuesioner-share-dialog";
 import KuesionerFormModal from "@/features/kuesioner/list/components/kuesioner-form-modal";
+import ImportKuesionerModal from "@/features/kuesioner/list/components/ImportKuesionerModal";
 
 import { useKuesioner } from "@/features/kuesioner/list/hooks";
 import PageHeader from "@/components/common/page-header";
@@ -29,9 +30,23 @@ export default function KuesionerPage() {
         (item) => item.kuesionerId === state.deleteId
     );
 
+
     return (
         <>
-            <PageHeader title="Halaman Daftar Kuesioner" />
+            <PageHeader
+                title="Halaman Kuesioner"
+                action={
+                    <Button
+                        variant="outline"
+                        onClick={() => state.setOpenImport(true)}
+                        className="gap-2 border-green-600 text-green-600"
+                    >
+                        <Upload className="h-4 w-4" />
+                        Import Kuesioner
+                    </Button>
+                }
+            />
+
 
             <AppBreadcrumb
                 className="pb-3"
@@ -134,6 +149,13 @@ export default function KuesionerPage() {
                     defaultValues={state.distribusiDefaultValues}
                     onClose={state.closeShareDialog}
                     onSubmit={state.submitShare}
+                />
+
+                {/* ================= IMPORT ================= */}
+                <ImportKuesionerModal
+                    open={state.openImport}
+                    onOpenChange={state.setOpenImport}
+                    onSuccess={state.refetch}
                 />
             </Card>
         </>

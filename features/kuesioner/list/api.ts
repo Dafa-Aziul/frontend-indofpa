@@ -4,5 +4,7 @@ export const kuesionerApi = {
     update: (id: number) => `/api/kuesioner/${id}`,
     delete: (id: number) => `/api/kuesioner/${id}`,
     distribution : (id: number) => `/api/kuesioner/${id}/distribusi`,
-    distributionUpdate: (id:number)  => `/api/distribusi/${id}`
+    distributionUpdate: (id:number)  => `/api/distribusi/${id}`,
+    import: "/api/kuesioner/import"
+
 };
