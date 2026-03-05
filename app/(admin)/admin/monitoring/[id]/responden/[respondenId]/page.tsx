@@ -5,8 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import PageHeader from "@/components/common/page-header";
 import ErrorState from "@/components/common/error-state";
 import AppBreadcrumb from "@/components/common/app-breadcrumb";
-import { Loader2, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 // Import Hook
 import { useRespondenDetail } from "@/features/monitoring/responden/hooks";

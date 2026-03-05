@@ -143,7 +143,7 @@ export default function AppBreadcrumb({
                     <BreadcrumbPage
                         title={lastItem.label}
                         className="
-              max-w-[160px]
+              max-w-40
               sm:max-w-[220px]
               md:max-w-none
               truncate

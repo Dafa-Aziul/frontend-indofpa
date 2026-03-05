@@ -5,7 +5,7 @@ import PageHeader from "@/components/common/page-header";
 import ErrorState from "@/components/common/error-state";
 import AppBreadcrumb from "@/components/common/app-breadcrumb";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Loader2, ArrowLeft, FileSpreadsheet, Upload } from "lucide-react"; // Tambahkan FileSpreadsheet
+import { Loader2, FileSpreadsheet, Upload } from "lucide-react"; // Tambahkan FileSpreadsheet
 import { Table } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
@@ -39,10 +39,6 @@ export default function DetailMonitoringPage() {
 
 
     const [openImport, setOpenImport] = useState(false);
-
-    const handleGoBack = () => {
-        router.push('/admin/monitoring');
-    };
 
     const handleViewAnswer = (respondenId: number) => {
         router.push(`/admin/monitoring/${kuesionerId}/responden/${respondenId}`);
