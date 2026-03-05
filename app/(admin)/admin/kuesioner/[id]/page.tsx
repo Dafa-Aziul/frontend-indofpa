@@ -98,7 +98,7 @@ export default function KuesionerDetailPage() {
         <div className="flex flex-col gap-6 pb-12">
             {/* Header & Breadcrumb Container */}
             <div className="space-y-1">
-                <PageHeader title="Detail Kuesioner" />
+                <PageHeader title="Detail Kuesioner" showBack/>
                 <AppBreadcrumb
                     items={[
                         { label: "Kuesioner", href: "/admin/kuesioner" },

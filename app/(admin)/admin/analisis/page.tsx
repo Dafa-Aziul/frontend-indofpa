@@ -57,7 +57,7 @@ export default function AnalisisPage() {
                 </CardHeader>
 
                 {/* ================= CONTENT ================= */}
-                <CardContent className="space-y-4 p-4 sm:p-6">
+                <CardContent className="space-y-4 relative">
                     <AnalisisTable
                         data={state.data}
                         page={state.page}

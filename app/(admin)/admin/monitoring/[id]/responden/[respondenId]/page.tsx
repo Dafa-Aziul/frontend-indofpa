@@ -100,12 +100,7 @@ export default function DetailJawabanRespondenPage() {
         <>
             <PageHeader
                 title={title}
-                action={
-                    <Button variant="outline" onClick={handleGoBack} className="gap-2">
-                        <ArrowLeft className="h-4 w-4" />
-                        Kembali
-                    </Button>
-                }
+                showBack
             />
 
             <AppBreadcrumb

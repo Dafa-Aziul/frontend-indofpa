@@ -108,7 +108,7 @@ export const PublicDetailView = ({ id }: { id: string }) => {
                         <Info size={18} className="text-emerald-600" />
                         <h4 className="font-black uppercase text-xs md:text-sm tracking-widest">Tujuan Penelitian</h4>
                     </div>
-                    <div className="bg-white p-6 md:p-8 rounded-4xl border-2 border-slate-50 shadow-sm">
+                    <div className="bg-white p-6 md:p-8 rounded-4xl border-2 border-slate-50 shadow-sm text-justify md:text-left">
                         <p className="text-slate-700 leading-relaxed text-base md:text-lg font-medium italic">
                             {kuesioner.tujuan}
                         </p>

@@ -32,7 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/* Layout polosan tanpa Navbar/Footer agar tidak bentrok dengan layout grup lain */}
-        {children} 
+        {children}
       </body>
     </html>
   );

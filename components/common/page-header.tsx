@@ -1,61 +1,81 @@
-// fileName: src/components/common/page-header.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
-import * as React from "react"; // Tambahkan import React
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 type PageHeaderProps = {
     title: string;
     description?: string;
     className?: string;
-    // ✅ Tambahkan action prop untuk menampung tombol atau elemen aksi
     action?: React.ReactNode;
+    showBack?: boolean;
 };
 
 export default function PageHeader({
     title,
     description,
     className,
-    action, // ✅ Terima prop action
+    action,
+    showBack = false,
 }: PageHeaderProps) {
-    return (
-        // Menggunakan flex-container untuk menata judul/deskripsi dan tombol aksi
-        <div className={cn("flex flex-col md:flex-row md:items-start justify-between gap-4 pb-4", className)}>
+    const router = useRouter();
 
-            {/* Bagian Kiri: Judul dan Deskripsi */}
-            <div className="space-y-2">
+    return (
+        <div className={cn("pb-4 space-y-3", className)}>
+
+            {/* Row utama */}
+            <div className="flex items-center justify-between">
+
+                {/* Title */}
                 <h1
                     className="
-                        font-bold
-                        text-3xl
-                        sm:text-4xl
-                        md:text-5xl
-                        leading-tight
-                    "
+            font-bold
+            text-2xl
+            sm:text-3xl
+            md:text-4xl
+            leading-tight
+            tracking-tight
+          "
                 >
                     {title}
                 </h1>
 
-                {description && (
-                    <p
-                        className="
-                            text-muted-foreground
-                            text-base
-                            sm:text-lg
-                            max-w-2xl
-                        "
-                    >
-                        {description}
-                    </p>
-                )}
+                {/* Right Side */}
+                <div className="flex items-center gap-4">
+
+                    {/* Back Button */}
+                    {showBack && (
+                        <button
+                            onClick={() => router.back()}
+                            className="
+                flex items-center gap-2
+                text-sm font-medium
+                text-muted-foreground
+                hover:text-primary
+                transition
+              "
+                        >
+                            <ArrowLeft size={18} />
+                            Kembali
+                        </button>
+                    )}
+
+                    {/* Custom Action */}
+                    {action}
+
+                </div>
+
             </div>
 
-            {/* Bagian Kanan: Aksi (Button Kembali) */}
-            {action && (
-                <div className="shrink-0 pt-2 md:pt-0">
-                    {action}
-                </div>
+            {/* Description */}
+            {description && (
+                <p className="text-muted-foreground text-sm sm:text-base max-w-xl">
+                    {description}
+                </p>
             )}
+
         </div>
     );
 }

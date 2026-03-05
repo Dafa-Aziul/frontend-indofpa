@@ -43,16 +43,27 @@ export default function Home() {
             </div>
 
             {/* Tombol Aksi (CTA) */}
-            <div className="flex flex-wrap items-center gap-4 mt-2">
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 py-7 text-lg font-bold shadow-xl shadow-emerald-100 transition-all hover:scale-105 active:scale-95">
+            <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 sm:gap-4 mt-4">
+
+              <Button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white 
+  rounded-full px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-bold 
+  shadow-lg shadow-emerald-100 transition-all hover:scale-105 active:scale-95">
+
                 Mulai Gratis Sekarang
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+
               </Button>
 
-              <Button variant="ghost" className="rounded-full px-6 py-7 text-lg font-semibold text-slate-600 hover:text-emerald-600 gap-2">
-                <PlayCircle className="h-6 w-6" />
+              <Button
+                variant="ghost"
+                className="w-full sm:w-auto rounded-full px-5 sm:px-6 py-4 sm:py-6 
+    text-base sm:text-lg font-semibold text-slate-600 
+    hover:text-emerald-600 gap-2"
+              >
+                <PlayCircle className="h-5 w-5 sm:h-6 sm:w-6" />
                 Lihat Demo
               </Button>
+
             </div>
           </div>
 

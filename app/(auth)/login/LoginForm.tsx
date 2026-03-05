@@ -108,6 +108,7 @@ export function LoginForm() {
                     <InputGroupInput
                         id="email"
                         placeholder="Masukkan email..."
+                        className="text-base leading-6 placeholder:text-black-400"
                         {...register("email")}
                     />
                 </InputGroup>
@@ -135,6 +136,7 @@ export function LoginForm() {
                     <InputGroupInput
                         id="password"
                         type={showPassword ? "text" : "password"}
+                        className="text-base leading-6 placeholder:text-black-400"
                         placeholder="Masukkan password..."
                         {...register("password")}
                     />
@@ -163,7 +165,7 @@ export function LoginForm() {
 
             {/* REMEMBER + FORGOT PASSWORD */}
             {/* Flex items-center justify-between sudah responsif untuk layar kecil */}
-            <div className="flex items-center justify-between"> 
+            <div className="flex items-center justify-between">
 
                 {/* Remember Me */}
                 <div className="flex items-center space-x-2">

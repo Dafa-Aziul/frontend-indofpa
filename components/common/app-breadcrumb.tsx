@@ -37,17 +37,31 @@ export default function AppBreadcrumb({
 }: AppBreadcrumbProps) {
     const shouldCollapse = items.length > 3;
 
+    /* LINK RENDER */
     const renderLink = (item: BreadcrumbItemType) => (
         <BreadcrumbLink asChild>
-            <Link href={item.href || "#"}>{item.label}</Link>
+            <Link
+                href={item.href || "#"}
+                title={item.label}
+                className="
+          max-w-[140px]
+          sm:max-w-[200px]
+          md:max-w-none
+          truncate
+          block
+        "
+            >
+                {item.label}
+            </Link>
         </BreadcrumbLink>
     );
 
     /* ================= NORMAL MODE ================= */
+
     if (!shouldCollapse) {
         return (
             <Breadcrumb className={cn("mb-4", className)}>
-                <BreadcrumbList>
+                <BreadcrumbList className="flex-wrap gap-y-1">
                     {items.map((item, index) => {
                         const isLast = index === items.length - 1;
 
@@ -55,7 +69,18 @@ export default function AppBreadcrumb({
                             <React.Fragment key={index}>
                                 <BreadcrumbItem>
                                     {isLast ? (
-                                        <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                                        <BreadcrumbPage
+                                            title={item.label}
+                                            className="
+                        max-w-[160px]
+                        sm:max-w-[220px]
+                        md:max-w-none
+                        truncate
+                        block
+                      "
+                                        >
+                                            {item.label}
+                                        </BreadcrumbPage>
                                     ) : (
                                         renderLink(item)
                                     )}
@@ -71,6 +96,7 @@ export default function AppBreadcrumb({
     }
 
     /* ================= COLLAPSED MODE ================= */
+
     const firstItem = items[0];
     const prevLastItem = items[items.length - 2];
     const lastItem = items[items.length - 1];
@@ -78,12 +104,15 @@ export default function AppBreadcrumb({
 
     return (
         <Breadcrumb className={cn("mb-4", className)}>
-            <BreadcrumbList>
+            <BreadcrumbList className="flex-wrap gap-y-1">
+
                 <BreadcrumbItem>{renderLink(firstItem)}</BreadcrumbItem>
+
                 <BreadcrumbSeparator />
 
                 <BreadcrumbItem>
                     <DropdownMenu>
+
                         <DropdownMenuTrigger className="flex items-center gap-1">
                             <BreadcrumbEllipsis className="h-4 w-4" />
                             <span className="sr-only">Toggle breadcrumb menu</span>
@@ -100,17 +129,31 @@ export default function AppBreadcrumb({
                                 </DropdownMenuItem>
                             ))}
                         </DropdownMenuContent>
+
                     </DropdownMenu>
                 </BreadcrumbItem>
 
                 <BreadcrumbSeparator />
 
                 <BreadcrumbItem>{renderLink(prevLastItem)}</BreadcrumbItem>
+
                 <BreadcrumbSeparator />
 
                 <BreadcrumbItem>
-                    <BreadcrumbPage>{lastItem.label}</BreadcrumbPage>
+                    <BreadcrumbPage
+                        title={lastItem.label}
+                        className="
+              max-w-[160px]
+              sm:max-w-[220px]
+              md:max-w-none
+              truncate
+              block
+            "
+                    >
+                        {lastItem.label}
+                    </BreadcrumbPage>
                 </BreadcrumbItem>
+
             </BreadcrumbList>
         </Breadcrumb>
     );

@@ -65,7 +65,7 @@ export default function MonitoringPage() {
                 </CardHeader>
 
                 {/* ================= CONTENT ================= */}
-                <CardContent className="space-y-4 pt-6 relative">
+                <CardContent className="space-y-4    relative">
                     {/* 🔹 LOADING OVERLAY (SMOOTH) */}
                     {state.showLoader && (
                         <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-10 transition-opacity">

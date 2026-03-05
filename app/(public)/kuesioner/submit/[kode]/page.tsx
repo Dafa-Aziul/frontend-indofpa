@@ -62,20 +62,23 @@ export default async function SubmitKuesionerPage({ params }: PageProps) {
                     </div>
 
                     {/* Trust Cards Section */}
-                    <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                         {TRUST_CARDS.map((card, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-start gap-4 p-5 md:p-6 rounded-4xl border transition-all hover:shadow-md ${card.bgColor} ${card.borderColor}`}
+                                className={`flex items-start gap-3 sm:gap-4 p-4 sm:p-5 md:p-6 rounded-3xl border
+      transition-all hover:shadow-md ${card.bgColor} ${card.borderColor}`}
                             >
-                                <div className="p-2.5 bg-white rounded-2xl shadow-sm shrink-0">
-                                    <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+                                <div className="p-2 sm:p-2.5 bg-white rounded-xl sm:rounded-2xl shadow-sm shrink-0">
+                                    <card.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${card.iconColor}`} />
                                 </div>
-                                <div>
-                                    <h4 className="text-sm font-black text-slate-900 mb-1 uppercase tracking-tight">
+
+                                <div className="space-y-1">
+                                    <h4 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-tight">
                                         {card.title}
                                     </h4>
-                                    <p className="text-xs text-slate-500 leading-relaxed font-medium">
+
+                                    <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium text-justify sm:text-left">
                                         {card.description}
                                     </p>
                                 </div>
@@ -84,7 +87,7 @@ export default async function SubmitKuesionerPage({ params }: PageProps) {
                     </div>
 
                     {/* Small Note */}
-                    <p className="mt-8 text-center text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
+                    <p className="mt-8 text-center text-[10px] text-slat    e-400 font-bold uppercase tracking-[0.2em]">
                         IndoFPA Digital Protocol • Secure Submission
                     </p>
                 </div>

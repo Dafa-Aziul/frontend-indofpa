@@ -17,18 +17,14 @@ export default function LoginPage() {
                     <LoginForm />
                 </div>
 
-                {/* KOLOM KANAN (GAMBAR/ILLUSTRASI) */}
-                {/* Sembunyikan di mobile (hidden) dan tampilkan di desktop (md:flex) */}
                 <div className="hidden md:flex bg-accent p-4 items-center justify-center">
                     <Image
                         src="/images/image_login.png"
-                        // Menggunakan layout responsif yang lebih modern (fill/sizes) lebih baik,
-                        // tetapi jika width/height harus digunakan:
+
                         width={300}
                         height={300}
                         alt="Login Illustration"
-                    // Jika Anda ingin gambar memenuhi kolom kanan (disarankan):
-                    // className="w-full h-auto max-h-[400px]" 
+
                     />
                 </div>
             </div>

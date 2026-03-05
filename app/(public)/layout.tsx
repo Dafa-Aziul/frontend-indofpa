@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { Navbar } from "@/components/navbar";
-
 import Footer from "@/components/footer";
 import { Toaster } from "sonner";
 
@@ -24,23 +23,23 @@ export const metadata: Metadata = {
   description: "Platform Kuisioner Online yang Mudah & Cepat",
 };
 
-export default function RootLayout({
+export default function PublicLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    <>
+      <Navbar />
+
+      <main
+        className={`container mx-auto px-6 ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        <main className="container mx-auto px-6">
-          {children}
-        </main>
-        <Footer />
-        <Toaster></Toaster>
-      </body>
-    </html>
+        {children}
+      </main>
+
+      <Footer />
+      <Toaster />
+    </>
   );
 }

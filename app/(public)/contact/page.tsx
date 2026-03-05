@@ -41,7 +41,7 @@ export default function ContactPage() {
           {/* EMAIL */}
           <Card className="group border-none shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white ring-1 ring-slate-100">
             <CardContent className="p-8 md:p-10 flex flex-col items-center text-center">
-              <div className="bg-emerald-50 text-emerald-600 p-5 rounded-[1.5rem] mb-6 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
+              <div className="bg-emerald-50 text-emerald-600 p-5 rounded-3xl mb-6 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
                 <Mail className="h-8 w-8" strokeWidth={1.5} />
               </div>
               <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Email Resmi</h3>
@@ -58,7 +58,7 @@ export default function ContactPage() {
           {/* LOKASI */}
           <Card className="group border-none shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white ring-1 ring-slate-100">
             <CardContent className="p-8 md:p-10 flex flex-col items-center text-center">
-              <div className="bg-blue-50 text-blue-600 p-5 rounded-[1.5rem] mb-6 group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
+              <div className="bg-blue-50 text-blue-600 p-5 rounded-3xl mb-6 group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
                 <MapPin className="h-8 w-8" strokeWidth={1.5} />
               </div>
               <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Headquarter</h3>
@@ -66,7 +66,7 @@ export default function ContactPage() {
                 Jl. Limau Manis, Kec. Pauh,<br />
                 Padang, Sumatera Barat
               </p>
-              <Button variant="outline" className="w-full border-blue-100 text-blue-700 font-black rounded-2xl h-14 hover:bg-blue-50 transition-all uppercase text-xs tracking-widest">
+              <Button variant="outline" className="w-full border-blue-100 text-blue-700 font-black rounded-2xl h-14 hover:bg-blue-100 hover:text-blue-700 transition-all uppercase text-xs tracking-widest">
                 Buka Google Maps
               </Button>
             </CardContent>
@@ -75,14 +75,14 @@ export default function ContactPage() {
           {/* TELEPON */}
           <Card className="group border-none shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white ring-1 ring-slate-100">
             <CardContent className="p-8 md:p-10 flex flex-col items-center text-center">
-              <div className="bg-amber-50 text-amber-600 p-5 rounded-[1.5rem] mb-6 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
+              <div className="bg-amber-50 text-amber-600 p-5 rounded-3xl mb-6 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
                 <Phone className="h-8 w-8" strokeWidth={1.5} />
               </div>
               <h3 className="text-lg md:text-xl font-black text-slate-900 mb-2 uppercase tracking-tight">Telepon & WA</h3>
               <p className="text-slate-500 text-sm mb-8 leading-relaxed font-medium">
                 Aktif Senin - Jumat <br /> 09:00 - 17:00 WIB
               </p>
-              <a href="https://wa.me/6281294765310" className="w-full py-4 px-4 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center justify-center gap-2">
+              <a href="https://wa.me/6281294765310" className="w-full py-4 px-4 bg-white text-amber-600 rounded-2xl font-black text-sm hover:bg-amber-100 hover:text-amber-600 transition-all shadow-lg shadow-slate-200 flex items-center justify-center gap-2">
                 Hubungi WhatsApp
               </a>
             </CardContent>

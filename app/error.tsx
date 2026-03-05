@@ -21,12 +21,12 @@ export default function Error({
 
   return (
     <div className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center px-6 overflow-hidden font-sans antialiased">
-      
+
       {/* Latar Belakang Dekoratif - Aksen Merah Halus (Indikasi Error) */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-red-50/50 to-transparent -z-10" />
 
       <div className="max-w-2xl w-full text-center space-y-10 relative z-10">
-        
+
         {/* Visual Section: Ikon Server Crash */}
         <div className="relative inline-flex">
           <div className="absolute inset-0 animate-pulse bg-red-100 rounded-full blur-2xl opacity-50"></div>
@@ -45,7 +45,7 @@ export default function Error({
               Kesalahan Internal Server
             </h2>
             <p className="text-slate-500 max-w-md mx-auto text-base md:text-lg font-medium leading-relaxed">
-              Mohon maaf, terjadi kendala teknis yang tidak terduga pada sistem kami. 
+              Mohon maaf, terjadi kendala teknis yang tidak terduga pada sistem kami.
               Tim teknis kami telah menerima laporan ini dan sedang berupaya melakukan perbaikan.
             </p>
           </div>

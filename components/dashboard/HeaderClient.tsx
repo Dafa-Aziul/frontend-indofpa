@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { logoutService } from "@/features/auth/services/auth.service";
 import SearchBar from "../searchBar";
+import Link from "next/link";
 
 type UserType = {
   userId: number;
@@ -90,12 +91,14 @@ export default function HeaderClient({ onOpenSidebar }: { onOpenSidebar: () => v
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem>
-              <User size={18} /> Profile
-            </DropdownMenuItem>
-
-            <DropdownMenuItem>
-              <Settings size={18} /> Settings
+            <DropdownMenuItem asChild>
+              <Link
+                href="/admin/profile"
+                className="flex items-center gap-2 w-full"
+              >
+                <User size={18} className="opacity-70" />
+                Profile & Settings
+              </Link>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
