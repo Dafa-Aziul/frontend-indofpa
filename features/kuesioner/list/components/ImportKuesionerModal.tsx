@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -30,16 +30,47 @@ export default function ImportKuesionerModal({
     const [loading, setLoading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
 
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+    const resetFileInput = () => {
+        setFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
 
         const dropped = e.dataTransfer.files?.[0];
-        if (dropped?.name.endsWith(".xlsx")) {
-            setFile(dropped);
-        } else {
+
+        if (!dropped) return;
+
+        if (!dropped.name.endsWith(".xlsx")) {
             toast.error("File harus .xlsx");
+            return;
         }
+
+        setFile(dropped);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selected = e.target.files?.[0];
+
+        if (!selected) return;
+
+        if (!selected.name.endsWith(".xlsx")) {
+            toast.error("File harus .xlsx");
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+
+            return;
+        }
+
+        setFile(selected);
     };
 
     const handleSubmit = async () => {
@@ -54,12 +85,14 @@ export default function ImportKuesionerModal({
             await importKuesioner(file);
 
             toast.success("Kuesioner berhasil diimport");
+
+            resetFileInput();
             onOpenChange(false);
-            setFile(null);
             onSuccess?.();
         } catch (err: unknown) {
             const message =
                 err instanceof Error ? err.message : "Gagal mengimport file";
+
             toast.error(message);
         } finally {
             setLoading(false);
@@ -70,7 +103,7 @@ export default function ImportKuesionerModal({
         <Dialog
             open={open}
             onOpenChange={(v) => {
-                if (!v) setFile(null);
+                if (!v) resetFileInput();
                 onOpenChange(v);
             }}
         >
@@ -82,11 +115,11 @@ export default function ImportKuesionerModal({
                     </DialogDescription>
                 </DialogHeader>
 
-                {/* DRAG & DROP AREA — mobile friendly */}
+                {/* DRAG & DROP AREA */}
                 <div
                     className={clsx(
                         "mt-3 border-2 border-dashed rounded-lg text-center transition-all cursor-pointer bg-card relative",
-                        "p-4 sm:p-6", // mobile smaller padding
+                        "p-4 sm:p-6",
                         isDragging ? "border-primary bg-secondary" : "border-border"
                     )}
                     onDragOver={(e) => {
@@ -107,9 +140,10 @@ export default function ImportKuesionerModal({
                     </p>
 
                     <input
+                        ref={fileInputRef}
                         type="file"
                         accept=".xlsx"
-                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                        onChange={handleFileChange}
                         className="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
                 </div>
@@ -119,14 +153,14 @@ export default function ImportKuesionerModal({
                     <div className="mt-4 flex items-center justify-between p-3 rounded-md border bg-secondary overflow-hidden">
                         <div className="flex items-center gap-3 min-w-0">
                             <FileSpreadsheet className="h-6 w-6 text-primary shrink-0" />
+
                             <span className="text-sm font-medium truncate max-w-[180px] sm:max-w-xs">
                                 {file.name}
                             </span>
                         </div>
 
-                        {/* Hapus File */}
                         <button
-                            onClick={() => setFile(null)}
+                            onClick={resetFileInput}
                             className="text-red-500 hover:text-red-600 transition"
                         >
                             <X className="h-5 w-5" />
@@ -139,7 +173,7 @@ export default function ImportKuesionerModal({
                         variant="outline"
                         className="flex-1"
                         onClick={() => {
-                            setFile(null);
+                            resetFileInput();
                             onOpenChange(false);
                         }}
                     >
@@ -165,4 +199,4 @@ export default function ImportKuesionerModal({
             </DialogContent>
         </Dialog>
     );
-}
+}   
