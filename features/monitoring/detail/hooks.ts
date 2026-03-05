@@ -36,40 +36,43 @@ export function useMonitoringDetail(kuesionerId: number) {
     const [isExporting, setIsExporting] = useState(false);
 
     const fetchData = useCallback(async () => {
-        if (isNaN(kuesionerId) || kuesionerId <= 0) {
-            setIsLoading(false);
-            setIsError(true);
-            return;
-        }
+    if (isNaN(kuesionerId) || kuesionerId <= 0) {
+        setIsLoading(false);
+        setIsError(true);
+        return;
+    }
 
-        setIsLoading(true);
-        setIsError(false);
+    setIsLoading(true);
+    setIsError(false);
 
-        try {
-            const res = await getMonitoringDetail(kuesionerId);
-            setKuesionerInfo(res.kuesioner);
-            setRespondenList(res.items);
-            setMeta(res.meta);
-        } catch (e: unknown) {
-            setIsError(true);
-            setKuesionerInfo(null);
-            setRespondenList([]);
-            setMeta(null);
-            toast.error(
-                getApiErrorMessage(
-                    e,
-                    `Gagal memuat detail monitoring ID ${kuesionerId}`
-                )
-            );
-        } finally {
-            setIsLoading(false);
-        }
-    }, [kuesionerId]);
+    try {
+        const res = await getMonitoringDetail(kuesionerId, page, search);
+
+        setKuesionerInfo(res.kuesioner);
+        setRespondenList(res.items);
+        setMeta(res.meta);
+
+    } catch (e: unknown) {
+        setIsError(true);
+        setKuesionerInfo(null);
+        setRespondenList([]);
+        setMeta(null);
+
+        toast.error(
+            getApiErrorMessage(
+                e,
+                `Gagal memuat detail monitoring ID ${kuesionerId}`
+            )
+        );
+    } finally {
+        setIsLoading(false);
+    }
+
+}, [kuesionerId, page, search]);
 
     // ✅ Fungsi Handler untuk Ekspor Laporan
     const handleExportLaporan = async () => {
         if (!kuesionerId) return;
-        
         setIsExporting(true);
         try {
             // Gunakan toast.promise agar user melihat progress-nya

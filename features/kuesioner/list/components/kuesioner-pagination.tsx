@@ -14,7 +14,7 @@ type Props = {
     pages: number;
     limit: number;
     total: number;
-    count: number; // data.length
+    count: number;
     onPageChange: (page: number) => void;
 };
 
@@ -31,56 +31,103 @@ export default function KategoriPagination({
     const start = (page - 1) * limit + 1;
     const end = start + count - 1;
 
+    // ================= PAGE RANGE =================
+    const getVisiblePages = () => {
+        const delta = 2;
+        const range = [];
+
+        for (
+            let i = Math.max(1, page - delta);
+            i <= Math.min(pages, page + delta);
+            i++
+        ) {
+            range.push(i);
+        }
+
+        return range;
+    };
+
+    const visiblePages = getVisiblePages();
+
     return (
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex flex-col gap-3 mt-4 sm:flex-row sm:items-center sm:justify-between">
+
             {/* ================= SUMMARY ================= */}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground text-center sm:text-left">
                 Menampilkan <strong>{start}</strong>–<strong>{end}</strong> dari{" "}
                 <strong>{total}</strong> data
             </p>
 
             {/* ================= PAGINATION ================= */}
             {pages > 1 && (
-                <div className="flex justify-end">
-                    <Pagination>
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    onClick={() => onPageChange(page - 1)}
-                                    className={
-                                        page === 1 ? "pointer-events-none opacity-50" : ""
-                                    }
-                                />
-                            </PaginationItem>
+                <Pagination className="justify-center sm:justify-end">
+                    <PaginationContent>
 
-                            {Array.from({ length: pages }).map((_, index) => {
-                                const pageNumber = index + 1;
+                        {/* PREVIOUS */}
+                        <PaginationItem>
+                            <PaginationPrevious
+                                onClick={() => page > 1 && onPageChange(page - 1)}
+                                className={page === 1 ? "pointer-events-none opacity-50" : ""}
+                            />
+                        </PaginationItem>
 
-                                return (
-                                    <PaginationItem key={pageNumber}>
-                                        <PaginationLink
-                                            isActive={page === pageNumber}
-                                            onClick={() => onPageChange(pageNumber)}
-                                        >
-                                            {pageNumber}
-                                        </PaginationLink>
+                        {/* FIRST PAGE */}
+                        {visiblePages[0] > 1 && (
+                            <>
+                                <PaginationItem>
+                                    <PaginationLink onClick={() => onPageChange(1)}>
+                                        1
+                                    </PaginationLink>
+                                </PaginationItem>
+
+                                {visiblePages[0] > 2 && (
+                                    <PaginationItem>
+                                        <span className="px-2 text-muted-foreground">...</span>
                                     </PaginationItem>
-                                );
-                            })}
+                                )}
+                            </>
+                        )}
 
-                            <PaginationItem>
-                                <PaginationNext
-                                    onClick={() => onPageChange(page + 1)}
-                                    className={
-                                        page === pages ? "pointer-events-none opacity-50" : ""
-                                    }
-                                />
+                        {/* MIDDLE PAGES */}
+                        {visiblePages.map((p) => (
+                            <PaginationItem key={p}>
+                                <PaginationLink
+                                    isActive={page === p}
+                                    onClick={() => onPageChange(p)}
+                                >
+                                    {p}
+                                </PaginationLink>
                             </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
-                </div>
+                        ))}
+
+                        {/* LAST PAGE */}
+                        {visiblePages[visiblePages.length - 1] < pages && (
+                            <>
+                                {visiblePages[visiblePages.length - 1] < pages - 1 && (
+                                    <PaginationItem>
+                                        <span className="px-2 text-muted-foreground">...</span>
+                                    </PaginationItem>
+                                )}
+
+                                <PaginationItem>
+                                    <PaginationLink onClick={() => onPageChange(pages)}>
+                                        {pages}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            </>
+                        )}
+
+                        {/* NEXT */}
+                        <PaginationItem>
+                            <PaginationNext
+                                onClick={() => page < pages && onPageChange(page + 1)}
+                                className={page === pages ? "pointer-events-none opacity-50" : ""}
+                            />
+                        </PaginationItem>
+
+                    </PaginationContent>
+                </Pagination>
             )}
         </div>
-
     );
 }

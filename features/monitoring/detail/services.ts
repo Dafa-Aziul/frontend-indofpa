@@ -29,12 +29,18 @@ const IMPORT_RESPONDEN_ENDPOINT = (id: number) =>
  */
 export function getMonitoringDetail(
   kuesionerId: number,
+  page: number,
+  search?: string,
 ): Promise<MonitoringDetailResponse> {
   return api
-    .get(MONITORING_DETAIL_ENDPOINT(kuesionerId))
+    .get(MONITORING_DETAIL_ENDPOINT(kuesionerId), {
+      params: {
+        page,
+        search,
+      },
+    })
     .then((res) => res.data.data);
 }
-
 /**
  * Mengekspor laporan kuesioner dalam format Excel.
  */
