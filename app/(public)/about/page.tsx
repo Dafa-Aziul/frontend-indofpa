@@ -37,7 +37,7 @@ export default function AboutPage() {
 
                             <div className="relative w-full h-full">
                                 <Image
-                                    src="/images/image_contact.png"
+                                    src="/images/image_contact.webp"
                                     alt="Tentang IndoFPA"
                                     fill
                                     className="object-contain drop-shadow-2xl"

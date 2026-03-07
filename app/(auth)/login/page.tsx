@@ -19,7 +19,7 @@ export default function LoginPage() {
 
                 <div className="hidden md:flex bg-accent p-4 items-center justify-center">
                     <Image
-                        src="/images/image_login.png"
+                        src="/images/image_login.webp"
 
                         width={300}
                         height={300}

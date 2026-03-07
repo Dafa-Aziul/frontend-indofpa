@@ -94,7 +94,7 @@ export default function Home() {
               </div>
 
               <Image
-                src="/images/image_home.png"
+                src="/images/image_home.webp"
                 alt="IndoFPA Dashboard"
                 fill
                 className="object-contain drop-shadow-2xl"
@@ -103,20 +103,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* LOGO PARTNER / TRUST SECTION (Opsional) */}
-        {/* <div className="py-10 border-t border-slate-50">
-          <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">
-            Dipercaya oleh peneliti dari berbagai institusi
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-40 grayscale hover:grayscale-0 transition-all">
-            
-            <div className="text-xl font-bold text-slate-400 italic">UNIVERSITAS</div>
-            <div className="text-xl font-bold text-slate-400 italic">INSTITUSI RISET</div>
-            <div className="text-xl font-bold text-slate-400 italic">KOMUNITAS</div>
-            <div className="text-xl font-bold text-slate-400 italic">NGO GLOBAL</div>
-          </div>
-        </div> */}
       </div>
     </div>
   );
