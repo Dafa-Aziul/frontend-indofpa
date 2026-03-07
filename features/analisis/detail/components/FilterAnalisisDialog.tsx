@@ -69,7 +69,9 @@ export const FilterAnalisisDialog: React.FC<FilterAnalisisDialogProps> = ({
                 (Array.isArray(value) && value.length === 0) ||
                 (typeof value === 'string' && value.trim() === '')
             ) {
-                const { [key]: _, ...rest } = prev;
+                // Kita ambil key yang ingin dibuang, sisanya masukkan ke 'rest'
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { [key]: unused, ...rest } = prev;
                 return rest;
             }
             return { ...prev, [key]: value };

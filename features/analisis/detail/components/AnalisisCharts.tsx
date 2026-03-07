@@ -176,11 +176,16 @@ const RingkasanVariabelTable: React.FC<{ data: AnalisisDetailData }> = ({ data }
 // ======================================================
 
 export default function AnalisisCharts({ data }: AnalisisChartsProps) {
-    if (!data) return null;
+    // 1. Definisikan config di atas, kasih fallback array kosong [] biar gak crash
+    const interpretasiConfig = useMemo(() =>
+        data?.kuesioner?.analisisConfig?.interpretasi || [],
+        [data]);
 
-    const interpretasiConfig = data.kuesioner.analisisConfig.interpretasi;
-
+    // 2. Hook useMemo HARUS di atas return null
     const pertanyaanChartData = useMemo<ChartDataItem[]>(() => {
+        // Cek data di DALAM hook, bukan di luarnya
+        if (!data) return [];
+
         const list: ChartDataItem[] = [];
         data.pertanyaan.forEach(group => {
             group.pertanyaan.forEach(p => {
@@ -194,9 +199,11 @@ export default function AnalisisCharts({ data }: AnalisisChartsProps) {
             });
         });
         return list;
-    }, [data.pertanyaan, interpretasiConfig]);
+    }, [data, interpretasiConfig]);
 
     const indikatorRadarData = useMemo<RadarDataItem[]>(() => {
+        if (!data) return [];
+
         return data.indikator.map(i => ({
             subject: i.indikatorKode,
             score: i.avgNormalized,
@@ -205,8 +212,13 @@ export default function AnalisisCharts({ data }: AnalisisChartsProps) {
             interpretasi: i.interpretasi,
             interpretasiConfig
         }));
-    }, [data.indikator, interpretasiConfig]);
+    }, [data, interpretasiConfig]);
 
+    // 3. BARU BOLEH RETURN NULL DI SINI
+    // Setelah semua Hook (useMemo) dipanggil
+    if (!data) return null;
+
+    // 4. Render JSX
     return (
         <div className="space-y-6">
             <RingkasanVariabelTable data={data} />

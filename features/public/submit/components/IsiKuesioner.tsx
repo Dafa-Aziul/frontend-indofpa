@@ -216,8 +216,10 @@ export const IsiKuesionerView = ({ kodeAkses }: { kodeAkses: string }) => {
                         <p className="text-[10px] md:text-xs font-bold text-emerald-700 mt-2 uppercase tracking-widest">{profile.nama} • {profile.pekerjaan}</p>
                     </div>
 
-                    {pertanyaanList.map((q: any, idx: number) => {
+                    {pertanyaanList.map((q: Pertanyaan, idx: number) => {
+                        // TypeScript sekarang tahu q.labelSkala adalah Record<string, string>
                         const skalaKeys = Object.keys(q.labelSkala || {}).sort((a, b) => Number(a) - Number(b));
+
                         return (
                             <Card key={q.pertanyaanId} className="border-none shadow-xl shadow-emerald-900/5 rounded-3xl md:rounded-[2.5rem] overflow-hidden">
                                 <CardHeader className="bg-emerald-50/30 p-6 md:p-8 border-b border-emerald-50">
@@ -239,23 +241,27 @@ export const IsiKuesionerView = ({ kodeAkses }: { kodeAkses: string }) => {
                                         {skalaKeys.map((key) => {
                                             const val = Number(key);
                                             const labelText = q.labelSkala[key];
-                                            const isSelected = answers[q.pertanyaanId] === val;
+
+                                            // TypeScript sekarang tahu q.pertanyaanId adalah string 
+                                            // dan answers menerima string sebagai key
+                                            const isSelected = (answers as Record<string, number>)[q.pertanyaanId] === val;
 
                                             return (
                                                 <div key={key} className="flex flex-col items-center gap-2 md:gap-3">
-                                                    {/* type="button" WAJIB agar tidak dianggap submit form saat pilih angka */}
                                                     <Button
                                                         type="button"
                                                         variant={isSelected ? "default" : "outline"}
                                                         className={`w-full h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-lg md:text-2xl transition-all duration-300 ${isSelected
-                                                            ? "bg-emerald-600 scale-105 shadow-2xl shadow-emerald-300 ring-4 ring-emerald-50"
-                                                            : "border-emerald-100 hover:border-emerald-400 text-gray-400 hover:text-emerald-600"
+                                                                ? "bg-emerald-600 scale-105 shadow-2xl shadow-emerald-300 ring-4 ring-emerald-50"
+                                                                : "border-emerald-100 hover:border-emerald-400 text-gray-400 hover:text-emerald-600"
                                                             }`}
+                                                        // Gunakan spread operator yang aman
                                                         onClick={() => setAnswers({ ...answers, [q.pertanyaanId]: val })}
                                                     >
                                                         {val}
                                                     </Button>
-                                                    <span className={`text-[8px] md:text-[10px] text-center font-bold uppercase leading-tight px-0.5 transition-colors ${isSelected ? "text-emerald-600" : "text-gray-400"}`}>
+                                                    <span className={`text-[8px] md:text-[10px] text-center font-bold uppercase leading-tight px-0.5 transition-colors ${isSelected ? "text-emerald-600" : "text-gray-400"
+                                                        }`}>
                                                         {labelText}
                                                     </span>
                                                 </div>

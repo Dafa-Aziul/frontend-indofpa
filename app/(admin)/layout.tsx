@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { cookies } from "next/headers"; // 1. IMPORT cookies
 import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = Geist({
@@ -22,18 +23,34 @@ export const metadata: Metadata = {
     description: "Platform Kuisioner Online yang Mudah & Cepat",
 };
 
-export default function RootLayout({
+// 2. Jadikan fungsi ini ASYNC agar bisa pakai await cookies()
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return (
+    // 3. AMBIL DATA COOKIE DI SINI
+    const cookieStore = await cookies();
+    const userCookie = cookieStore.get("user")?.value;
 
+    let userData = null;
+    if (userCookie) {
+        try {
+            // Decode dan parse JSON
+            userData = JSON.parse(decodeURIComponent(userCookie));
+        } catch (e) {
+            console.error("Gagal parse cookie user:", e);
+        }
+    }
+
+    return (
         <>
-            <DashboardLayout>
+            <DashboardLayout initialUser={userData}>
                 {children}
             </DashboardLayout>
             <Toaster />
         </>
+
+
     );
 }

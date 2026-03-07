@@ -24,7 +24,11 @@ let failedQueue: {
 
 const processQueue = (error: AxiosError | null, token: string | null) => {
   failedQueue.forEach((prom) => {
-    error ? prom.reject(error) : prom.resolve(token as string);
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token as string);
+    }
   });
   failedQueue = [];
 };

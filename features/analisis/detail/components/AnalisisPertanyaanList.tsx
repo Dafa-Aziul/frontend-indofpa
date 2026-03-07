@@ -33,7 +33,7 @@ const getInterpretasiChipClass = (score: number) => {
 // SUB-KOMPONEN: PROGRESS BAR KUSTOM (Dibuat lebih tipis)
 // ======================================================
 
-const PertanyaanProgressBar: React.FC<{ normalizedScore: number; avgRaw: number; maxScale: number }> = ({ normalizedScore, avgRaw, maxScale }) => {
+const PertanyaanProgressBar: React.FC<{ normalizedScore: number; avgRaw: number; maxScale: number }> = ({ normalizedScore, avgRaw }) => {
     const width = Math.min(100, Math.max(0, normalizedScore));
     const colorClass = getProgressBarColor(normalizedScore);
 

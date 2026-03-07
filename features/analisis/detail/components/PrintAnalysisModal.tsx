@@ -11,7 +11,7 @@ import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import { AnalysisPDFDocument } from "./AnalysisPDFDocument";
 import { AnalisisDetailData, FilterPayload } from "../types";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Loader2, X } from "lucide-react";
+import { FileText, Download, Loader2} from "lucide-react";
 
 interface Props {
     open: boolean;

@@ -82,7 +82,9 @@ export default function Header({ onOpenSidebar }: { onOpenSidebar: () => void })
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 cursor-pointer">
               <Avatar className="bg-muted">
-                <AvatarFallback>{initials}</AvatarFallback>
+                <AvatarFallback suppressHydrationWarning>
+                  {initials}
+                </AvatarFallback>
               </Avatar>
 
               {/* Teks profil (Desktop Only) */}

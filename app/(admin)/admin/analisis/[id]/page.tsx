@@ -1,7 +1,7 @@
 // fileName: src/app/analisis/[id]/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from "next/navigation";
 import { useAnalisisDetail } from '@/features/analisis/detail/hooks';
 
@@ -35,7 +35,7 @@ import {
     ChevronLeft,
     RotateCw,
     SearchX,
-    Info 
+    Info
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -47,7 +47,7 @@ function cn(...inputs: ClassValue[]) {
 export default function AnalisisPage() {
     const router = useRouter();
     const params = useParams();
-    const id = params?.id;
+    const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
     const kuesionerId = Number(id);
 
     // State Manajemen
@@ -55,21 +55,19 @@ export default function AnalisisPage() {
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
     const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+    const [configModalDismissed, setConfigModalDismissed] = useState(false);
 
     // Hook Data Fetching
     const { data, isError, isLoading, isConfigMissing, refetch } = useAnalisisDetail(kuesionerId, activeFilters);
 
     // CEK KONFIGURASI: Otomatis buka modal jika status isConfigMissing aktif
-    useEffect(() => {
-        if (isConfigMissing) {
-            setIsConfigModalOpen(true);
-        }
-    }, [isConfigMissing]);
+    const configModalOpen =
+        (isConfigMissing && !configModalDismissed) || isConfigModalOpen;
 
     // Handler Konfigurasi Sukses
     const handleConfigSuccess = () => {
         setIsConfigModalOpen(false);
-        refetch(); 
+        refetch();
     };
 
     // Handler Filter
@@ -79,27 +77,36 @@ export default function AnalisisPage() {
     };
 
     const handleRemoveFilter = (key: keyof FilterPayload, valueToRemove: unknown) => {
-        const updatedFilters: FilterPayload = { ...activeFilters };
-        if (valueToRemove === null || valueToRemove === undefined) {
-            const { [key]: _ignored, ...rest } = updatedFilters;
-            setActiveFilters(rest);
-            return;
-        }
-        const currentFilterValue = updatedFilters[key];
-        if (currentFilterValue !== undefined) {
-            if (Array.isArray(currentFilterValue)) {
-                const newArray = (currentFilterValue as unknown[]).filter(v => v !== valueToRemove);
-                if (newArray.length === 0) {
-                    const { [key]: _ignored, ...rest } = updatedFilters;
-                    setActiveFilters(rest);
-                } else {
-                    setActiveFilters({ ...updatedFilters, [key]: newArray as FilterPayload[typeof key] });
-                }
-            } else if (currentFilterValue === valueToRemove) {
-                const { [key]: _ignored, ...rest } = updatedFilters;
-                setActiveFilters(rest);
+        setActiveFilters(prev => {
+            const updatedFilters: FilterPayload = { ...prev };
+
+            if (valueToRemove == null) {
+                delete updatedFilters[key];
+                return updatedFilters;
             }
-        }
+
+            const currentValue = updatedFilters[key];
+
+            if (currentValue === undefined) return updatedFilters;
+
+            if (Array.isArray(currentValue)) {
+                const filtered = currentValue.filter(v => v !== valueToRemove);
+
+                if (filtered.length === 0) {
+                    delete updatedFilters[key];
+                } else {
+                    (updatedFilters as Record<string, unknown>)[key] = filtered;
+                }
+
+                return updatedFilters;
+            }
+
+            if (currentValue === valueToRemove) {
+                delete updatedFilters[key];
+            }
+
+            return updatedFilters;
+        });
     };
 
     // 1. INITIAL LOADING STATE
@@ -142,7 +149,7 @@ export default function AnalisisPage() {
 
             {/* PROGRESS BAR HALUS */}
             {isLoading && data && (
-                <div className="fixed top-0 left-0 right-0 h-1 bg-emerald-100 z-[100]">
+                <div className="fixed top-0 left-0 right-0 h-1 bg-emerald-100 z-100">
                     <div className="h-full bg-emerald-600 animate-pulse w-full" style={{ animationDuration: '1.5s' }} />
                 </div>
             )}
@@ -204,7 +211,7 @@ export default function AnalisisPage() {
             )}>
                 {isConfigMissing ? (
                     /* PLACEHOLDER SAAT CONFIG BELUM ADA - THEME GREEN */
-                    <div className="bg-white border-2 border-dashed border-emerald-100 rounded-[2rem] p-12 sm:p-20 text-center animate-in zoom-in-95 duration-300">
+                    <div className="bg-white border-2 border-dashed border-emerald-100 rounded-4xl p-12 sm:p-20 text-center animate-in zoom-in-95 duration-300">
                         <div className="bg-emerald-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                             <Info className="h-12 w-12 text-emerald-500" />
                         </div>
@@ -220,7 +227,7 @@ export default function AnalisisPage() {
                         </Button>
                     </div>
                 ) : hasNoData ? (
-                    <div className="bg-white border-2 border-dashed border-slate-200 rounded-[2rem] p-12 sm:p-20 text-center animate-in zoom-in-95 duration-300">
+                    <div className="bg-white border-2 border-dashed border-slate-200 rounded-4xl p-12 sm:p-20 text-center animate-in zoom-in-95 duration-300">
                         <div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                             <SearchX className="h-12 w-12 text-slate-300" />
                         </div>
@@ -256,8 +263,11 @@ export default function AnalisisPage() {
 
             {/* DIALOGS & MODALS */}
             <ConfigInterpretasiModal
-                onClose={() => setIsConfigModalOpen(false)} // FIXED: Sebelumnya setIsModalOpen
-                isOpen={isConfigModalOpen}
+                onClose={() => {
+                    setIsConfigModalOpen(false);
+                    setConfigModalDismissed(true);
+                }}
+                isOpen={configModalOpen}
                 kuesionerId={kuesionerId}
                 onSuccess={handleConfigSuccess}
                 initialData={data?.kuesioner?.analisisConfig?.interpretasi}

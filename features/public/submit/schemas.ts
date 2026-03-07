@@ -114,9 +114,4 @@ export const submitKuesionerSchema = z.object({
 
 export type SubmitPayload = z.infer<typeof submitKuesionerSchema>;
 
-interface Pertanyaan {
-  pertanyaanId: string;
-  teksPertanyaan: string;
-  // Pakai Record<string, string> agar bisa diakses pakai variabel key
-  labelSkala: Record<string, string>;
-}
+
