@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'IndoFPA',
     description: 'Analisis kuesioner jadi lebih mudah.',
-    images: ['/og-image.webp'],
+    images: ['./public/images/og-image.webp'],
   },
 };
 
