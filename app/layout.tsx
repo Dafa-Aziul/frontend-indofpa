@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     siteName: 'IndoFPA',
     images: [
       {
-        url: '../public/images/og-image.webp',
+        url: 'images/og-image.webp',
         width: 1200,
         height: 630,
       },
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'IndoFPA',
     description: 'Analisis kuesioner jadi lebih mudah.',
-    images: ['../public/images/og-image.webp'],
+    images: ['/images/og-image.webp'],
   },
 };
 
